@@ -1,4 +1,4 @@
-import { CONFIG, IS_MOCK } from '../config.js';
+import { CONFIG, IS_MOCK, siteUrl } from '../config.js';
 
 /** ساخت آدرس صفحه با پارامترها؛ در حالت mock نسبت به ریشه‌ی dist و در شیرپوینت نسبت به Site Collection */
 export function url(name, params = {}) {
@@ -13,9 +13,9 @@ export function url(name, params = {}) {
 
 export function loginUrl(returnTo = location.href) {
   if (IS_MOCK) return url('login', { ReturnUrl: returnTo });
-  return `${CONFIG.loginUrl}?Source=${encodeURIComponent(returnTo)}`;
+  return `${siteUrl(CONFIG.loginUrl)}?Source=${encodeURIComponent(returnTo)}`;
 }
 
 export function logoutUrl() {
-  return IS_MOCK ? url('home') : CONFIG.logoutUrl;
+  return IS_MOCK ? url('home') : siteUrl(CONFIG.logoutUrl);
 }

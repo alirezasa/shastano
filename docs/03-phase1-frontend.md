@@ -66,8 +66,8 @@ sharepoint/layouts/Shastan/login.aspx   صفحه‌ی ورود FBA
 
 ## محدودیت‌ها و کار باقی‌مانده
 
-- `sp-provider.js` و `login.aspx` روی فارم واقعی اجرا نشده‌اند و در فاز ۳ روی محیط تست شیرپوینت باید تست شوند.
-- هندلر `PublicSubmit.ashx` و `Captcha.ashx` (سمت سرور) در فاز ۶ ساخته می‌شوند؛ قرارداد آن‌ها:
+- استقرار روی شیرپوینت: [`04-sharepoint-deployment.md`](04-sharepoint-deployment.md).
+- هندلرهای `PublicSubmit.ashx` و `Captcha.ashx` ساخته شده‌اند (`sharepoint/layouts/Shastan`)؛ قرارداد آن‌ها:
   - `GET Captcha.ashx` → `{ "token": "...", "image": "data:image/png;base64,..." }`
   - `POST PublicSubmit.ashx` (multipart: `kind=proposal|contact`، فیلدهای فرم، `CaptchaToken`، `CaptchaAnswer`، `files`) → `{ "ok": true, "trackingCode": "P-1405-0012" }` یا `{ "ok": false, "message": "...", "field": "CaptchaAnswer" }`
 - نقشه‌ی صفحه‌ی تماس جای‌نگهدار است (تصویر یا سرویس نقشه‌ی داخلی).

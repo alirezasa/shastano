@@ -1,7 +1,7 @@
 import { html, mount, shn } from '../core/util.js';
 import { faNum } from '../core/format.js';
 import { getStats, getDomains, getDomainCounts, queryPublic, getPublicItems } from '../data/repository.js';
-import { challengeCard, skeletonCards, errorState, emptyState, icon, TONE } from '../ui/components.js';
+import { challengeCard, skeletonCards, errorState, emptyState, icon, TONE, companyMark } from '../ui/components.js';
 import { url } from '../ui/urls.js';
 
 const STAT_CARDS = [
@@ -121,7 +121,7 @@ async function renderCompanyStrip() {
     const list = await getPublicItems('companies');
     mount(el, html`${list.map((c) => html`
       <a href="${url('company', { id: c.Id })}" class="tw-flex tw-items-center tw-gap-3 tw-rounded-2xl tw-border tw-border-surface-line tw-bg-white tw-px-4 tw-py-3 tw-text-sm tw-font-bold tw-transition hover:tw-border-ocean-300 hover:tw-text-ocean-700">
-        <span class="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-xl tw-bg-ocean-50 tw-text-ocean-700">${icon(c.Icon || 'fa-building')}</span>${c.Title}</a>`)}`);
+        ${companyMark(c, 'tw-h-9 tw-w-9 tw-rounded-xl tw-bg-ocean-50 tw-text-ocean-700')}${c.Title}</a>`)}`);
   } catch {
     el.hidden = true;
   }

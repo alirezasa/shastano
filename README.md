@@ -13,6 +13,7 @@
 | [`docs/01-review-and-scenario.md`](docs/01-review-and-scenario.md) | بررسی قالب اولیه، معماری، نقش‌ها و مجوزها، طراحی لیست‌ها، گردش‌کار، تصمیم‌های نهایی، نقشه‌ی راه |
 | [`docs/02-authentication-fba-ldap.md`](docs/02-authentication-fba-ldap.md) | ورود با صفحه‌ی اختصاصی: FBA + LDAP روی Active Directory |
 | [`docs/03-phase1-frontend.md`](docs/03-phase1-frontend.md) | فاز ۱: صفحات، ساختار کد، اجرا و تست |
+| [`docs/04-sharepoint-deployment.md`](docs/04-sharepoint-deployment.md) | **راهنمای گام‌به‌گام استقرار روی شیرپوینت**: لیست‌ها، کتابخانه‌ها، اسکریپت‌ها، تست |
 
 ## اجرای سریع
 
@@ -22,4 +23,7 @@ npm run build
 npm run serve   # http://localhost:8080
 ```
 
-پوشه‌ی `dist/` خروجی ساخته‌شده است (برای پیش‌نمایش و استقرار). قالب اولیه برای مقایسه در `_original/` نگهداری شده است.
+- `dist/` — نسخه‌ی پیش‌نمایش محلی (با داده‌ی نمایشی؛ فقط برای توسعه)
+- `dist/sharepoint/` — **بسته‌ی استقرار شیرپوینت** (مستر پیج، صفحات، فایل‌های قالب، هندلرها و اسکریپت‌های PowerShell؛ بدون داده‌ی نمایشی)
+
+قالب اولیه برای مقایسه در `_original/` نگهداری شده است.

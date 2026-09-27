@@ -5,11 +5,19 @@
 const spCtx = typeof window !== 'undefined' ? window._spPageContextInfo : undefined;
 const override = typeof window !== 'undefined' ? window.SHASTAN_CONFIG || {} : {};
 
+/** آدرس سایت از روی مسیر صفحه (…/SitePages/x.aspx یا …/PanelPages/x.aspx) در صورت نبود _spPageContextInfo */
+function siteFromLocation() {
+  if (typeof location === 'undefined') return '';
+  const m = location.pathname.match(/^(.*?)\/(SitePages|PanelPages)\//i);
+  return location.origin + (m ? m[1] : '');
+}
+
 export const CONFIG = {
+  // نسخه‌ی شیرپوینت (مستر پیج) mode را صریحاً 'sp' تعیین می‌کند؛ نسخه‌ی شیرپوینت اصلاً داده‌ی نمایشی ندارد.
   mode: override.mode || (spCtx ? 'sp' : 'mock'),
 
-  // آدرس Site Collection ریشه که لیست‌ها در آن هستند (پنل‌ها در زیرسایت /panel قرار دارند)
-  dataSiteUrl: override.dataSiteUrl || (spCtx ? spCtx.siteAbsoluteUrl : ''),
+  // آدرس سایتی که لیست‌ها در آن هستند (web ریشه‌ی Site Collection)
+  dataSiteUrl: override.dataSiteUrl || (spCtx ? spCtx.webAbsoluteUrl || spCtx.siteAbsoluteUrl : siteFromLocation()),
 
   // نام لیست‌ها در شیرپوینت (Title لیست)
   lists: {
@@ -32,11 +40,12 @@ export const CONFIG = {
     settings: 'SiteSettings'
   },
 
-  // هندلر سمت سرور (WSP) برای فرم‌های عمومی: کپچا، اعتبارسنجی، ذخیره با دسترسی سیستمی
-  publicHandler: override.publicHandler || '/_layouts/15/Shastan/PublicSubmit.ashx',
-  captchaUrl: override.captchaUrl || '/_layouts/15/Shastan/Captcha.ashx',
-  loginUrl: override.loginUrl || '/_layouts/15/Authenticate.aspx',
-  logoutUrl: override.logoutUrl || '/_layouts/15/SignOut.aspx',
+  // هندلرهای سمت سرور (LAYOUTS\\Shastan) برای فرم‌های عمومی: کپچا، اعتبارسنجی، ذخیره با دسترسی سیستمی
+  // نسبت به آدرس سایت ساخته می‌شوند تا SPContext سایت درست باشد.
+  publicHandler: override.publicHandler || '_layouts/15/Shastan/PublicSubmit.ashx',
+  captchaUrl: override.captchaUrl || '_layouts/15/Shastan/Captcha.ashx',
+  loginUrl: override.loginUrl || '_layouts/15/Authenticate.aspx',
+  logoutUrl: override.logoutUrl || '_layouts/15/SignOut.aspx',
 
   pageSize: 9,
   roleCacheMinutes: 10,
@@ -49,11 +58,14 @@ export const CONFIG = {
       companyPanel: 'panel/company.html', adminPanel: 'panel/admin.html'
     },
     sp: {
-      home: 'Pages/default.aspx', challenges: 'Pages/challenges.aspx', challenge: 'Pages/challenge.aspx', companies: 'Pages/companies.aspx',
-      company: 'Pages/company.aspx', catalog: 'Pages/catalog.aspx', contact: 'Pages/contact.aspx', login: null,
-      companyPanel: 'panel/Pages/company.aspx', adminPanel: 'panel/Pages/admin.aspx'
+      home: 'SitePages/index.aspx', challenges: 'SitePages/challenges.aspx', challenge: 'SitePages/challenge.aspx', companies: 'SitePages/companies.aspx',
+      company: 'SitePages/company.aspx', catalog: 'SitePages/catalog.aspx', contact: 'SitePages/contact.aspx', login: null,
+      companyPanel: 'PanelPages/company.aspx', adminPanel: 'PanelPages/admin.aspx'
     }
   }
 };
 
 export const IS_MOCK = CONFIG.mode === 'mock';
+
+/** آدرس کامل یک مسیر نسبت به سایت داده */
+export const siteUrl = (path = '') => `${CONFIG.dataSiteUrl.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
