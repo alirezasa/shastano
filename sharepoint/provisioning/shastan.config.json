@@ -1,0 +1,14 @@
+{
+  "SiteUrl": "http://srv-shp-web:8080",
+  "Zone": "Default",
+  "EnableAnonymousOnWebApplication": true,
+
+  "CompaniesCsv": "companies.csv",
+  "Categories": ["پتروشیمی", "نفت و گاز", "پالایش و روانکار", "خدمات مهندسی", "سرمایه‌گذاری"],
+
+  "HoldingAdminsMembers": ["SHASTAN\\SHN-Holding-Admins"],
+  "HoldingReviewersMembers": ["SHASTAN\\SHN-Holding-Reviewers"],
+  "VisitorsMembers": ["c:0(.s|true"],
+
+  "HoldingNotifyEmails": "innovation@shastan.ir"
+}

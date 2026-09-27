@@ -4,9 +4,9 @@
 //    روی همه‌ی نسخه‌های 2016/2019/SE پایدار است.
 //  - امنیت واقعی با مجوزهای شیرپوینت اعمال می‌شود؛ این لایه فقط از آن پیروی می‌کند.
 //
-// ⚠ این فایل روی فارم واقعی باید تست شود (در محیط توسعه فقط حالت mock قابل اجراست).
+// نام لیست‌ها و ستون‌ها با اسکریپت sharepoint/provisioning/Install-ShastanPortal.ps1 یکسان است.
 
-import { CONFIG } from '../config.js';
+import { CONFIG, siteUrl } from '../config.js';
 import { TYPES, REVIEW_TYPES } from '../schema.js';
 import { storage } from '../core/util.js';
 import { jalaliYear } from '../core/format.js';
@@ -62,7 +62,10 @@ function selectFor(type) {
   if (!def.noCompany) { select.push('Company/Id', 'Company/Title'); expand.add('Company'); }
   if (type === 'companies') select.push('CompanyCode', 'Icon');
   for (const f of def.fields) {
-    if (f.type === 'domain') { select.push('Domain/Id', 'Domain/Title'); expand.add('Domain'); } else if (f.type === 'category') { select.push('Category/Id', 'Category/Title'); expand.add('Category'); } else if (f.type === 'files') { select.push('Attachments', 'AttachmentFiles/FileName', 'AttachmentFiles/ServerRelativeUrl'); expand.add('AttachmentFiles'); } else select.push(f.name);
+    if (f.type === 'domain') { select.push('Domain/Id', 'Domain/Title'); expand.add('Domain'); } else if (f.type === 'category') { select.push('Category/Id', 'Category/Title'); expand.add('Category'); } else if (f.type === 'files') {
+      if (def.library) select.push('FileRef', 'FileLeafRef');
+      else { select.push('Attachments', 'AttachmentFiles/FileName', 'AttachmentFiles/ServerRelativeUrl'); expand.add('AttachmentFiles'); }
+    } else select.push(f.name);
   }
   return `$select=${[...new Set(select)].join(',')}&$expand=${[...expand].join(',')}`;
 }
@@ -71,7 +74,11 @@ function shape(type, r) {
   const def = TYPES[type];
   const o = { type, Id: r.Id, Code: type === 'companies' ? r.CompanyCode : r.ItemCode, Created: r.Created, Modified: r.Modified, SubmittedOn: r.SubmittedOn, PublishedOn: r.PublishedOn, ReviewedOn: r.ReviewedOn, AuthorTitle: r.Author?.Title, ReviewerTitle: r.Reviewer?.Title, WorkflowStatus: r.WorkflowStatus, Moderation: r.OData__ModerationStatus };
   for (const f of def.fields) {
-    if (f.type === 'domain') { o.DomainId = r.Domain?.Id ?? null; o.DomainTitle = r.Domain?.Title ?? ''; } else if (f.type === 'category') { o.CategoryId = r.Category?.Id ?? null; o.CategoryTitle = r.Category?.Title ?? ''; } else if (f.type === 'files') o.Attachments = (r.AttachmentFiles || []).map((a) => ({ name: a.FileName, url: a.ServerRelativeUrl })); else o[f.name] = r[f.name];
+    if (f.type === 'domain') { o.DomainId = r.Domain?.Id ?? null; o.DomainTitle = r.Domain?.Title ?? ''; } else if (f.type === 'category') { o.CategoryId = r.Category?.Id ?? null; o.CategoryTitle = r.Category?.Title ?? ''; } else if (f.type === 'files') {
+      o.Attachments = def.library
+        ? (r.FileRef ? [{ name: r.FileLeafRef, url: r.FileRef }] : [])
+        : (r.AttachmentFiles || []).map((a) => ({ name: a.FileName, url: a.ServerRelativeUrl }));
+    } else o[f.name] = r[f.name];
   }
   if (type === 'companies') { o.CompanyId = r.Id; o.CompanyTitle = r.Title; o.Icon = r.Icon || 'fa-building'; } else if (!def.noCompany) { o.CompanyId = r.Company?.Id ?? null; o.CompanyTitle = r.Company?.Title ?? ''; }
   o.LastComment = r.ReviewComments ? { Comment: r.ReviewComments, Actor: r.Reviewer?.Title, Date: r.ReviewedOn } : null;
@@ -199,12 +206,17 @@ function toSpValue(field, value) {
   return value;
 }
 
+const folderCache = {};
+/** پوشه‌ی شرکت در یک لیست (نام پوشه = CompanyCode). پوشه‌ها و مجوزشان را اسکریپت نصب می‌سازد. */
 async function companyFolderUrl(listTitle, companyId) {
+  const key = `${listTitle}|${companyId}`;
+  if (folderCache[key]) return folderCache[key];
   const [root, company] = await Promise.all([
     request(`${listUrl(listTitle)}/RootFolder?$select=ServerRelativeUrl`),
-    request(`${listUrl(typeList('companies'))}/items(${Number(companyId)})?$select=CompanyCode`)
+    companyId ? request(`${listUrl(typeList('companies'))}/items(${Number(companyId)})?$select=CompanyCode`) : null
   ]);
-  return `${root.ServerRelativeUrl}/${company.CompanyCode}`;
+  folderCache[key] = company?.CompanyCode ? `${root.ServerRelativeUrl}/${company.CompanyCode}` : root.ServerRelativeUrl;
+  return folderCache[key];
 }
 
 async function jsomSave(type, id, set, { folderUrl, moderation, moderationComment } = {}) {
@@ -220,11 +232,14 @@ async function jsomSave(type, id, set, { folderUrl, moderation, moderationCommen
     item = list.addItem(info);
   }
   Object.entries(set).forEach(([k, v]) => item.set_item(k, v));
-  if (moderation != null) {
+  const isLibrary = !!TYPES[type]?.library;
+  if (moderation != null && !isLibrary) {
     item.set_item('_ModerationStatus', moderation);
     if (moderationComment != null) item.set_item('_ModerationComments', moderationComment);
   }
   item.update();
+  // در کتابخانه‌ی اسناد تأیید از طریق خود فایل انجام می‌شود
+  if (moderation === 0 && isLibrary) item.get_file().approve(moderationComment || '');
   ctx.load(item, 'Id');
   await exec(ctx);
   return item.get_id();
@@ -237,10 +252,12 @@ async function addAttachments(type, id, files) {
   }
 }
 
+// لاگ در پوشه‌ی شرکت ثبت می‌شود تا شرکت سابقه‌ی اقلام خودش (از جمله نظر هلدینگ) را ببیند و شرکت‌های دیگر نه.
 async function writeAudit(type, item, action, comment = '') {
   try {
     const u = await getCurrentUser();
-    await jsomSaveRaw(CONFIG.lists.audit, {
+    const folderUrl = await companyFolderUrl(CONFIG.lists.audit, item.CompanyId || null);
+    await jsomSaveRaw(CONFIG.lists.audit, folderUrl, {
       Title: (item?.Title || '').slice(0, 255), ListName: type, ItemId: item.Id, Action: action, ActionComment: comment || '',
       CompanyRef: item.CompanyId || null, ActorName: u.Title
     });
@@ -249,11 +266,13 @@ async function writeAudit(type, item, action, comment = '') {
   }
 }
 
-async function jsomSaveRaw(listTitle, set) {
+async function jsomSaveRaw(listTitle, folderUrl, set) {
   await jsomReady();
   const SP = window.SP;
   const ctx = new SP.ClientContext(web());
-  const item = ctx.get_web().get_lists().getByTitle(listTitle).addItem(new SP.ListItemCreationInformation());
+  const info = new SP.ListItemCreationInformation();
+  if (folderUrl) info.set_folderUrl(folderUrl);
+  const item = ctx.get_web().get_lists().getByTitle(listTitle).addItem(info);
   Object.entries(set).forEach(([k, v]) => item.set_item(k, v));
   item.update();
   await exec(ctx);
@@ -310,12 +329,20 @@ export async function saveItem(type, id, values, { submit = false, files = [] } 
   }
   if (!id && type === 'challenges' && !set.CallStatus) set.CallStatus = 'Open';
 
-  const newId = await jsomSave(type, id, set, { folderUrl, moderation: u.role === 'holding' ? 0 : null });
+  let targetId = id;
+  if (def.library && !id) {
+    // کتابخانه‌ی اسناد: ابتدا فایل بارگذاری و سپس ستون‌های آیتم آن تنظیم می‌شود
+    if (!files.length) throw new Error('فایل سند را انتخاب کنید.');
+    targetId = await uploadToLibrary(type, files[0]);
+  } else if (def.library && files.length) {
+    throw new Error('برای جایگزینی فایل، سند جدید ثبت و سند قبلی را بایگانی کنید.');
+  }
+  const newId = await jsomSave(type, targetId, set, { folderUrl, moderation: u.role === 'holding' ? 0 : null });
   if (!id) {
     // کد رهگیری بعد از دریافت شناسه ساخته می‌شود
     await jsomSave(type, newId, { ItemCode: `${def.codePrefix}-${jalaliYear()}-${String(newId).padStart(4, '0')}` }, { moderation: u.role === 'holding' ? 0 : null });
   }
-  if (files.length) await addAttachments(type, newId, files);
+  if (files.length && !def.library) await addAttachments(type, newId, files);
   session.remove(`shn.pub.${type}`);
 
   const saved = await getItem(type, newId);
@@ -324,6 +351,15 @@ export async function saveItem(type, id, values, { submit = false, files = [] } 
     await notify(await holdingEmails(), `درخواست جدید برای بررسی: ${saved.Title}`, `<div dir="rtl">شرکت «${u.companyTitle}» یک ${def.label} با عنوان «${saved.Title}» برای بررسی ارسال کرده است.</div>`);
   }
   return saved;
+}
+
+async function uploadToLibrary(type, file) {
+  const root = await request(`${listUrl(typeList(type))}/RootFolder?$select=ServerRelativeUrl`);
+  const safe = file.name.replace(/[~#%&*{}\\:<>?/+|"']/g, '_');
+  const name = `${Date.now()}-${safe}`;
+  const up = await request(`${web()}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(root.ServerRelativeUrl.replace(/'/g, "''"))}')/Files/add(url='${encodeURIComponent(name)}',overwrite=false)?$expand=ListItemAllFields&$select=ListItemAllFields/Id`,
+    { method: 'POST', body: await file.arrayBuffer(), digest: true });
+  return up.ListItemAllFields.Id;
 }
 
 // ---------- کارتابل هلدینگ ----------
@@ -357,7 +393,7 @@ async function review(type, id, action, comment = '') {
   const reviewer = new window.SP.FieldUserValue();
   reviewer.set_lookupId(u.Id);
   const set = { WorkflowStatus: m.status, ReviewedOn: stamp, Reviewer: reviewer };
-  if (comment) set.ReviewComments = comment; // ستون Append-only: تاریخچه در Version History حفظ می‌شود
+  if (comment) set.ReviewComments = comment; // آخرین نظر؛ تاریخچه‌ی کامل در AuditLog و Version History
   if (action === 'Approve' && !before.PublishedOn) set.PublishedOn = stamp;
   await jsomSave(type, id, set, { moderation: m.moderation, moderationComment: comment });
   session.remove(`shn.pub.${type}`);
@@ -427,11 +463,11 @@ export async function setProposalStatus(id, status, comment = '') {
   await exec(ctx);
 }
 
-// ---------- فرم‌های عمومی: هندلر سمت سرور (Shastan.Portal.wsp) ----------
+// ---------- فرم‌های عمومی: هندلر سمت سرور (LAYOUTS\\Shastan\\PublicSubmit.ashx) ----------
 // لیست‌های Proposals و ContactMessages هیچ مجوزی برای کاربر ناشناس ندارند؛ هندلر پس از بررسی کپچا،
 // اعتبارسنجی و محدودیت نرخ، با دسترسی سیستمی ذخیره می‌کند.
 export async function getCaptcha() {
-  const j = await request(`${CONFIG.captchaUrl}?t=${Date.now()}`, { headers: { Accept: 'application/json' } });
+  const j = await request(`${siteUrl(CONFIG.captchaUrl)}?t=${Date.now()}`, { headers: { Accept: 'application/json' } });
   return { token: j.token, image: j.image };
 }
 
@@ -440,7 +476,7 @@ async function postPublic(kind, data, files = []) {
   fd.append('kind', kind);
   Object.entries(data).forEach(([k, v]) => fd.append(k, v ?? ''));
   files.forEach((f) => fd.append('files', f, f.name));
-  const res = await fetch(CONFIG.publicHandler, { method: 'POST', body: fd, credentials: 'same-origin' });
+  const res = await fetch(siteUrl(CONFIG.publicHandler), { method: 'POST', body: fd, credentials: 'same-origin' });
   const j = await res.json().catch(() => ({}));
   if (!res.ok || !j.ok) {
     const e = new Error(j.message || 'ارسال ناموفق بود. لطفاً دوباره تلاش کنید.');

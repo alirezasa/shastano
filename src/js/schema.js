@@ -185,7 +185,7 @@ export const TYPES = {
   },
 
   publications: {
-    key: 'publications', list: 'Publications', owner: 'holding', public: true,
+    key: 'publications', list: 'Publications', owner: 'holding', public: true, library: true,
     label: 'نشریه / گزارش', plural: 'انتشارات و گزارش‌ها', codePrefix: 'PUB',
     icon: 'fa-file-lines', tone: 'green', noCompany: true,
     description: 'گزارش‌ها، کتاب‌ها و بروشورهای منتشرشده توسط هلدینگ شستان',
@@ -194,7 +194,7 @@ export const TYPES = {
       { name: 'PubType', label: 'نوع', type: 'choice', options: opt('گزارش', 'کتاب', 'مقاله', 'بروشور'), required: true },
       { name: 'PubDate', label: 'تاریخ انتشار', type: 'date', required: true },
       F.summary,
-      { name: 'Attachments', label: 'فایل', type: 'files' }
+      { name: 'Attachments', label: 'فایل سند (PDF، Word، …)', type: 'files', single: true, requiredOnCreate: true }
     ],
     card: { meta: ['PubType'], date: 'PubDate' }
   },
@@ -207,6 +207,7 @@ export const TYPES = {
     fields: [
       { name: 'Title', label: 'نام شرکت', type: 'text', required: true, max: 160, holdingOnly: true },
       { name: 'Category', label: 'دسته‌بندی', type: 'category', required: true, holdingOnly: true },
+      { name: 'Logo', label: 'نشانی تصویر لوگو', type: 'url', holdingOnly: true, hint: 'تصویر را در کتابخانه‌ی «لوگوی شرکت‌ها» بارگذاری و نشانی آن را اینجا وارد کنید.' },
       { name: 'ShortDesc', label: 'معرفی کوتاه', type: 'note', required: true, max: 300, rows: 3 },
       { name: 'About', label: 'درباره‌ی شرکت', type: 'note', rows: 6 },
       { name: 'Established', label: 'سال تأسیس', type: 'number', min: 1300, max: 1500 },
