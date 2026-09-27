@@ -1,7 +1,7 @@
 # سکوی نوآوری و فناوری شستان — بررسی قالب و سناریوی پیاده‌سازی در SharePoint Server 2019 (On-Premises)
 
 > این سند مرحله‌ی اول است: بررسی قالب فعلی (`index.html`) و سناریوی کامل پیاده‌سازی.
-> پیاده‌سازی مستر پیج، لیست‌ها و کدها در مراحل بعد، بر اساس تصمیم‌های بخش «سؤالات باز» انجام می‌شود.
+> تصمیم‌های نهایی کارفرما در بخش ۸ ثبت شده‌اند و بر بخش‌های قبلی اولویت دارند.
 
 ---
 
@@ -58,7 +58,7 @@
 ### ۲-۲. ساختار سایت و Zone ها
 
 ```
-https://innovation.shastan.ir            ← Zone: Internet  (Anonymous + FBA/ADFS برای ورود)
+https://innovation.shastan.ir            ← Zone: Internet  (Anonymous + FBA/LDAP روی AD با صفحه‌ی ورود اختصاصی)
 https://innovation.shastan.local         ← Zone: Default   (Windows Auth — برای Crawl جستجو)
 
 / (Site Collection ریشه — عمومی، Anonymous: Lists and Libraries)
@@ -83,7 +83,7 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 
 | گروه | اعضا | سطح دسترسی |
 |------|------|------------|
-| `Anonymous` (کاربر ناشناس) | همه | View Items فقط روی لیست‌های عمومی؛ Add Items روی «پیام‌های تماس» (و در صورت تصمیم، «پیشنهادها») |
+| `Anonymous` (کاربر ناشناس) | همه | فقط View Items روی لیست‌های عمومی؛ **هیچ مجوز نوشتنی ندارد** (فرم‌های عمومی از هندلر سمت سرور عبور می‌کنند — بخش ۴-۳) |
 | `SHN-Visitors` | همه‌ی کاربران احراز هویت‌شده | Read |
 | `SHN-Company-<کد>-Editors` (یک گروه برای هر شرکت، ۲۸ گروه) | کارشناسان هر شرکت تابعه | سطح سفارشی **«ویرایش بدون حذف»** (Contribute منهای Delete) فقط روی پوشه/آیتم همان شرکت |
 | `SHN-Company-<کد>-Managers` *(اختیاری)* | مدیر هر شرکت | تأیید داخلی شرکت قبل از ارسال به هلدینگ |
@@ -154,7 +154,7 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 | `ShortDesc` | Multiple lines (Plain) | ✅ |
 | `About` | Multiple lines (Enhanced Rich Text) | ✅ |
 | `Website`، `Address`، `PublicPhone`، `PublicEmail` | | ✅ |
-| `RepName`، `RepTitle`، `RepEmail`، `RepPhone` نماینده‌ی فناوری | | تصمیم‌گیری شود |
+| ~~اطلاعات نماینده‌ی فناوری~~ | | به لیست جداگانه‌ی `CompanyContacts` منتقل شد (بخش ۸) |
 | `EditorsGroup` | Single line (نام گروه شرکت) | ❌ |
 | `IsActive`، `SortOrder` | | |
 
@@ -172,7 +172,6 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 | `ExpectedOutcome` | Rich Text — دستاورد مورد انتظار |
 | `CurrentSolution` | Rich Text — وضعیت/راهکار فعلی |
 | `TRLRequired` | Choice 1..9 (اختیاری) |
-| `BudgetRange` | Choice (داخلی، عمومی نمایش داده نشود) |
 | `Deadline` | Date — مهلت ارسال پیشنهاد |
 | `CallStatus` | Choice — چرخه‌ی عمر فراخوان (بخش ۵-۲) |
 | `WorkflowStatus` | Choice — چرخه‌ی تأیید (بخش ۵-۱) |
@@ -182,13 +181,13 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 | پیوست‌ها | Attachments |
 
 **`RDProjects` — طرح‌های R&D**
-`Title`، `Company`، `Domain`، `RelatedChallenge` (Lookup → TechChallenges)، `Partner` (مجری/دانشگاه/شرکت دانش‌بنیان)، `StartDate`، `EndDate`، `ProgressPercent`، `ProjectStatus`، `Summary`، `Description`، `Budget`(داخلی)، + ستون‌های مشترک گردش‌کار
+`Title`، `Company`، `Domain`، `RelatedChallenge` (Lookup → TechChallenges)، `Partner` (مجری/دانشگاه/شرکت دانش‌بنیان)، `StartDate`، `EndDate`، `ProgressPercent`، `ProjectStatus`، `Summary`، `Description`، + ستون‌های مشترک گردش‌کار
 
 **`Products` — محصولات و خدمات دانش‌بنیان**
 `Title`، `Company`، `Domain`، `Image`، `Summary`، `Description`، `KnowledgeBasedCertNo`، `Website`، + ستون‌های مشترک
 
 **`Contracts` — قراردادهای رفع نیاز**
-`Title`، `Company`، `RelatedChallenge`، `Contractor`، `ContractDate`، `Amount`(داخلی)، `ContractStatus`، + ستون‌های مشترک
+`Title`، `Company`، `RelatedChallenge`، `Contractor`، `ContractDate`، `DurationMonths`، `ContractStatus`، + ستون‌های مشترک
 
 **`DevelopmentPlans` — طرح‌های توسعه‌ای**، **`Patents` — اختراعات**، **`MoUs` — تفاهم‌نامه‌ها**
 ساختار مشابه: `Title`، `Company`، `Domain`، `Summary`، `Description`، تاریخ‌های مرتبط، + ستون‌های مشترک
@@ -201,11 +200,15 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 
 ### ۴-۳. ورودی‌های عمومی
 
-**`ContactMessages` — پیام‌های تماس**
-`Title`(نام)، `Organization`، `Phone`، `Email`، `Message`، `Subject`، `HandledStatus`، `HandledBy`، `Response`
-مجوز: ناشناس فقط Add؛ Item-level: «Read items that were created by the user» + فقط هلدینگ همه را می‌بیند؛ **کپچا** الزامی.
+> **هیچ‌کدام از این دو لیست به کاربر ناشناس مجوز نمی‌دهند.** فرم‌های عمومی به هندلر سمت سرور
+> `/_layouts/15/Shastan/PublicSubmit.ashx` ارسال می‌شوند که کپچا (سمت سرور)، فیلد تله، محدودیت نرخ بر اساس IP،
+> نوع و حجم فایل را بررسی می‌کند و سپس با دسترسی سیستمی آیتم و پیوست را ذخیره و ایمیل اطلاع‌رسانی ارسال می‌کند.
+> دادن «Add Items» به کاربر ناشناس روی سایت اینترنتی راه را برای اسپم و بارگذاری فایل مخرب باز می‌کند.
 
-**`Proposals` — پیشنهادهای شرکت‌های دانش‌بنیان برای هر RFP** *(نیاز به تصمیم، بخش ۸)*
+**`ContactMessages` — پیام‌های تماس** (فقط هلدینگ می‌خواند)
+`Title`(نام)، `Organization`، `Phone`، `Email`، `Message`، `Subject`، `HandledStatus`، `HandledBy`، `Response`
+
+**`Proposals` — پیشنهادهای شرکت‌های دانش‌بنیان برای هر RFP** (بدون ثبت‌نام؛ هلدینگ همه را، هر شرکت پیشنهادهای مسائل خودش را می‌خواند)
 `Title`، `Challenge`(Lookup)، `ApplicantCompany`، `ContactName`، `Phone`، `Email`، `KnowledgeBasedCertNo`، `ProposalSummary`، پیوست، `EvaluationStatus`، `EvaluationScore`، `EvaluatorComment`
 
 ### ۴-۴. عملیاتی
@@ -359,16 +362,21 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 
 ---
 
-## ۸. سؤالات باز (قبل از پیاده‌سازی)
+## ۸. تصمیم‌های نهایی و اثر آن‌ها
 
-1. **احراز هویت کاربران شرکت‌های تابعه**: حساب AD در دامین هلدینگ دارند؟ یا باید **FBA** (نام کاربری/رمز در دیتابیس SQL با صفحه‌ی ورود سفارشی) راه‌اندازی شود؟ یا ADFS موجود است؟
-2. **سایت روی اینترنت منتشر می‌شود یا فقط اینترانت؟** (روی تنظیمات Zone، HTTPS، کپچا و سخت‌سازی اثر مستقیم دارد.)
-3. **Workflow Manager** روی فارم نصب است؟ اجازه‌ی نصب **Farm Solution** (کد سمت سرور C#: Event Receiver برای تولید کد، اعتبارسنجی، ایمیل و لاگ) داریم؟ اگر نه، همه‌چیز سمت کلاینت (REST + `SP.Utilities.Utility.SendEmail`) پیاده می‌شود.
-4. **ارسال پیشنهاد** توسط شرکت‌های دانش‌بنیان: بدون ثبت‌نام (فرم ناشناس + کپچا) یا با ثبت‌نام (نوع کاربر چهارم)؟
-5. اطلاعات **نماینده‌ی فناوری** شرکت‌ها عمومی باشد یا فقط برای کاربران واردشده؟
-6. تأیید داخلی مدیر شرکت قبل از هلدینگ و/یا تأیید دومرحله‌ای در هلدینگ لازم است؟
-7. لوگو، رنگ‌های سازمانی و نام نهایی برند (شستان) — فایل لوگو ارسال شود.
-8. نسخه و آخرین CU نصب‌شده روی SharePoint 2019.
+| # | تصمیم کارفرما | اثر در طراحی |
+|---|---------------|--------------|
+| 1 | کاربران شرکت‌های تابعه روی **AD** هستند؛ صفحه‌ی ورود پیش‌فرض شیرپوینت مناسب نیست | **FBA با `LdapMembershipProvider`** روی همان AD + صفحه‌ی ورود اختصاصی `/_layouts/15/Shastan/login.aspx` (هم‌شکل قالب). گروه‌های AD به‌صورت Role Claim به گروه‌های شیرپوینت اضافه می‌شوند. جزئیات: [`02-authentication-fba-ldap.md`](02-authentication-fba-ldap.md) |
+| 2 | سایت **روی اینترنت** منتشر می‌شود | HTTPS اجباری، Zone اینترنت (Anonymous + FBA)، Lockdown Mode، WAF/Reverse Proxy، کپچای سمت سرور، هیچ مجوز نوشتن برای ناشناس |
+| 3 | **Workflow Manager ندارد** | گردش‌کار بدون Workflow: تغییر وضعیت با JSOM روی Content Approval بومی، ایمیل با `SP.Utilities.Utility.SendEmail`، لاگ در لیست `AuditLog`. فقط یک بسته‌ی کوچک `Shastan.Portal.wsp` لازم است (صفحه‌ی ورود + هندلر فرم‌های عمومی + کپچا) |
+| 4 | شرکت دانش‌بنیان **بدون ثبت‌نام** پیشنهاد می‌فرستد | فرم عمومی در صفحه‌ی هر مسئله + کپچا + کد رهگیری؛ ذخیره از طریق هندلر سمت سرور |
+| 5 | اطلاعات تماس نماینده **فقط برای کاربران واردشده** | لیست جداگانه‌ی **`CompanyContacts`** بدون دسترسی ناشناس (چون شیرپوینت امنیت ستونی ندارد، مخفی کردن ستون در UI کافی نیست؛ REST ستون را به ناشناس برمی‌گرداند) |
+| 6 | تأیید **فقط در هلدینگ** (یک مرحله) | بدون تأیید داخلی شرکت؛ گروه‌های `SHN-Holding-Reviewers` و `SHN-Holding-Admins` مجوز Approve دارند |
+| 7 | لوگو و رنگ **از قالب** | نماد لامپ در مربع گرادیان آبی‌ـفیروزه‌ای، هدر سبز `#008000`، تأکید قرمز `#c22c2c`، دکمه‌های آبی `#0284c7`، Hero گرادیان قرمز→آبی |
+
+### قانون کلیدی که از تصمیم ۵ نتیجه شد
+> **هر ستونی که در یک لیست عمومی باشد، عمومی است.** اطلاعات محرمانه (مبلغ قرارداد، بودجه، اطلاعات تماس اشخاص) هرگز در لیست‌های با دسترسی ناشناس قرار نمی‌گیرد.
+> به همین دلیل ستون‌های «بازه‌ی بودجه» و «مبلغ قرارداد» از طراحی حذف شدند.
 
 > ⚠️ **نکته‌ی مهم پشتیبانی**: پشتیبانی تمدیدشده‌ی SharePoint Server 2019 در **۱۴ ژوئیه‌ی ۲۰۲۶** به پایان رسیده و دیگر به‌روزرسانی امنیتی دریافت نمی‌کند. برای سایتی که **روی اینترنت و با دسترسی ناشناس** منتشر می‌شود این ریسک جدی است (WAF/Reverse Proxy جلوی سرور، سخت‌سازی و برنامه‌ی مهاجرت به SharePoint Server Subscription Edition توصیه می‌شود). معماری این سند (Classic Publishing + REST) بدون تغییر روی Subscription Edition هم قابل اجراست.
 
@@ -376,11 +384,11 @@ https://innovation.shastan.local         ← Zone: Default   (Windows Auth — �
 
 ## ۹. نقشه‌ی راه پیاده‌سازی
 
-| فاز | خروجی |
-|-----|-------|
-| ۱ | بازطراحی قالب HTML (اصلاح موارد بخش ۱، برند واحد، صفحات جداگانه، موبایل) + سیستم طراحی (Tailwind کامپایل‌شده) |
-| ۲ | اسکریپت PnP/PowerShell ساخت لیست‌ها، Content Type ها، گروه‌ها و مجوزها + داده‌ی نمونه |
-| ۳ | تبدیل به `shastan.master` + Page Layout ها + صفحات عمومی متصل به REST |
-| ۴ | پنل شرکت تابعه (داشبورد، فرم‌ها، ارسال، اصلاح) |
-| ۵ | کارتابل و مدیریت هلدینگ (تأیید/برگشت/رد، مقایسه‌ی نسخه، گزارش‌ها) |
-| ۶ | اعلان‌ها، لاگ، جستجو، سخت‌سازی امنیتی، تست نفوذ و استقرار |
+| فاز | خروجی | وضعیت |
+|-----|-------|-------|
+| ۱ | بازطراحی قالب HTML (اصلاح موارد بخش ۱، برند واحد، صفحات جداگانه، موبایل) + سیستم طراحی + ماژول‌های JS با دو منبع داده (نمایشی / شیرپوینت) + صفحه‌ی ورود اختصاصی | ✅ انجام شد — [`03-phase1-frontend.md`](03-phase1-frontend.md) |
+| ۲ | اسکریپت PnP/PowerShell ساخت لیست‌ها، Content Type ها، گروه‌ها و مجوزها + داده‌ی نمونه | بعدی |
+| ۳ | تبدیل به `shastan.master` + Page Layout ها + صفحات عمومی متصل به REST |  |
+| ۴ | پنل شرکت تابعه (داشبورد، فرم‌ها، ارسال، اصلاح) | رابط کاربری آماده؛ اتصال به شیرپوینت در فاز ۳ |
+| ۵ | کارتابل و مدیریت هلدینگ (تأیید/برگشت/رد، مقایسه‌ی نسخه، گزارش‌ها) | رابط کاربری آماده؛ اتصال به شیرپوینت در فاز ۳ |
+| ۶ | اعلان‌ها، لاگ، جستجو، سخت‌سازی امنیتی، تست نفوذ و استقرار | شامل `Shastan.Portal.wsp` (هندلر فرم‌های عمومی + کپچا) |

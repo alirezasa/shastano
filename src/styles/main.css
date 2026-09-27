@@ -1,0 +1,145 @@
+/* سکوی نوآوری و فناوری شستان — استایل اصلی
+   همه‌ی استایل‌های پایه فقط داخل #shastan-app اعمال می‌شوند تا روی ریبون و صفحات سیستمی شیرپوینت اثر نگذارند. */
+
+@font-face {
+  font-family: 'Dana';
+  src: url('../fonts/DanaFaNum-Regular.woff2') format('woff2'), url('../fonts/DanaFaNum-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dana';
+  src: url('../fonts/DanaFaNum-Bold.woff2') format('woff2'), url('../fonts/DanaFaNum-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body.shn-body { margin: 0; background: theme('colors.surface.page'); }
+
+  #shastan-app {
+    font-family: theme('fontFamily.sans');
+    color: theme('colors.ink.DEFAULT');
+    background: theme('colors.surface.page');
+    line-height: 1.7;
+    direction: rtl;
+    text-align: right;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  :where(#shastan-app) *, :where(#shastan-app) *::before, :where(#shastan-app) *::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: theme('colors.surface.line'); }
+  :where(#shastan-app) h1, :where(#shastan-app) h2, :where(#shastan-app) h3, :where(#shastan-app) h4, :where(#shastan-app) p, :where(#shastan-app) ul, :where(#shastan-app) ol, :where(#shastan-app) figure, :where(#shastan-app) blockquote, :where(#shastan-app) dl, :where(#shastan-app) dd { margin: 0; }
+  :where(#shastan-app) h1, :where(#shastan-app) h2, :where(#shastan-app) h3, :where(#shastan-app) h4 { font-size: inherit; font-weight: 700; line-height: 1.5; color: inherit; }
+  :where(#shastan-app) ul, :where(#shastan-app) ol { list-style: none; padding: 0; }
+  :where(#shastan-app) a { color: inherit; text-decoration: none; }
+  :where(#shastan-app) img, :where(#shastan-app) svg { display: block; max-width: 100%; }
+  :where(#shastan-app) button, :where(#shastan-app) input, :where(#shastan-app) select, :where(#shastan-app) textarea {
+    font: inherit; color: inherit; margin: 0; background: transparent; line-height: inherit;
+  }
+  :where(#shastan-app) button { cursor: pointer; padding: 0; }
+  :where(#shastan-app) button:disabled { cursor: not-allowed; opacity: .55; }
+  :where(#shastan-app) table { border-collapse: collapse; }
+  :where(#shastan-app) [hidden] { display: none !important; }
+  :where(#shastan-app) :focus-visible { outline: 3px solid theme('colors.ocean.300'); outline-offset: 2px; border-radius: 6px; }
+  :where(#shastan-app) ::selection { background: theme('colors.brand.100'); }
+}
+
+@layer components {
+  #shastan-app .shn-container { @apply tw-mx-auto tw-w-full tw-max-w-site tw-px-4 sm:tw-px-6 lg:tw-px-8; }
+
+  /* دکمه‌ها */
+  #shastan-app .shn-btn { @apply tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-px-4 tw-py-2.5 tw-text-sm tw-font-bold tw-transition tw-duration-150 tw-whitespace-nowrap; }
+  #shastan-app .shn-btn-sm { @apply tw-px-3 tw-py-1.5 tw-text-xs tw-rounded-lg; }
+  #shastan-app .shn-btn-lg { @apply tw-px-6 tw-py-3 tw-text-base; }
+  #shastan-app .shn-btn-primary { @apply tw-bg-ocean-600 tw-text-white hover:tw-bg-ocean-700 tw-shadow-sm; }
+  #shastan-app .shn-btn-brand { @apply tw-bg-brand-600 tw-text-white hover:tw-bg-brand-700 tw-shadow-sm; }
+  #shastan-app .shn-btn-danger { @apply tw-bg-accent-600 tw-text-white hover:tw-bg-accent-700 tw-shadow-sm; }
+  #shastan-app .shn-btn-warning { @apply tw-bg-amber-500 tw-text-slate-950 hover:tw-bg-amber-400 tw-shadow-sm; }
+  #shastan-app .shn-btn-ghost { @apply tw-bg-white tw-text-ink tw-border tw-border-surface-line hover:tw-bg-slate-50 hover:tw-border-slate-300; }
+  #shastan-app .shn-btn-soft { @apply tw-bg-slate-100 tw-text-ink hover:tw-bg-slate-200; }
+  #shastan-app .shn-btn-link { @apply tw-text-ocean-700 hover:tw-text-ocean-900 tw-font-bold; }
+
+  /* کارت و بخش */
+  #shastan-app .shn-card { @apply tw-bg-white tw-rounded-card tw-border tw-border-surface-line tw-shadow-soft; }
+  #shastan-app .shn-card-hover { @apply tw-transition hover:tw-shadow-card hover:tw-border-ocean-200 hover:-tw-translate-y-0.5; }
+  #shastan-app .shn-section-title { @apply tw-text-xl sm:tw-text-2xl tw-font-bold tw-text-ink; }
+  #shastan-app .shn-section-sub { @apply tw-text-sm tw-text-ink-muted tw-mt-1; }
+  #shastan-app .shn-eyebrow { @apply tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-1 tw-text-xs tw-font-bold; }
+
+  /* برچسب‌ها */
+  #shastan-app .shn-chip { @apply tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-bold tw-leading-5 tw-whitespace-nowrap; }
+  #shastan-app .shn-badge { @apply tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-px-2.5 tw-py-0.5 tw-text-[11px] tw-font-bold tw-leading-5 tw-whitespace-nowrap; }
+
+  /* فرم */
+  #shastan-app .shn-label { @apply tw-block tw-text-sm tw-font-bold tw-text-ink tw-mb-1.5; }
+  #shastan-app .shn-hint { @apply tw-block tw-text-xs tw-text-ink-muted tw-mt-1; }
+  #shastan-app .shn-input { @apply tw-block tw-w-full tw-rounded-xl tw-border tw-border-slate-300 tw-bg-white tw-px-3 tw-py-2.5 tw-text-sm tw-text-ink tw-transition placeholder:tw-text-slate-400 focus:tw-border-ocean-500 focus:tw-outline-none focus:tw-ring-4 focus:tw-ring-ocean-100; }
+  #shastan-app .shn-input[aria-invalid='true'] { @apply tw-border-accent-500 focus:tw-ring-accent-100; }
+  #shastan-app .shn-input:disabled, #shastan-app .shn-input[readonly] { @apply tw-bg-slate-100 tw-text-ink-muted; }
+  #shastan-app .shn-error { @apply tw-block tw-text-xs tw-text-accent-700 tw-mt-1 tw-font-bold; }
+
+  /* منو */
+  #shastan-app .shn-nav-link { @apply tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-sm tw-font-bold tw-text-white/90 tw-transition hover:tw-bg-white/10 hover:tw-text-white; }
+  #shastan-app .shn-nav-link.is-active { @apply tw-bg-white/15 tw-text-white; }
+  #shastan-app .shn-dropdown { @apply tw-absolute tw-top-full tw-mt-2 tw-min-w-[16rem] tw-rounded-2xl tw-bg-white tw-p-2 tw-text-ink tw-shadow-card tw-border tw-border-surface-line tw-z-50; }
+  #shastan-app .shn-dropdown-item { @apply tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-px-3 tw-py-2.5 tw-text-sm tw-transition hover:tw-bg-slate-50; }
+
+  /* جدول */
+  #shastan-app .shn-table { @apply tw-w-full tw-text-sm; }
+  #shastan-app .shn-table th { @apply tw-bg-slate-50 tw-text-ink-muted tw-font-bold tw-text-xs tw-text-right tw-px-4 tw-py-3 tw-border-b tw-border-surface-line tw-whitespace-nowrap; }
+  #shastan-app .shn-table td { @apply tw-px-4 tw-py-3 tw-border-b tw-border-slate-100 tw-align-middle; }
+  #shastan-app .shn-table tbody tr:hover { @apply tw-bg-slate-50/70; }
+
+  /* تب */
+  #shastan-app .shn-tab { @apply tw-relative tw-pb-3 tw-text-sm tw-font-bold tw-text-ink-muted tw-transition hover:tw-text-ink tw-whitespace-nowrap; }
+  #shastan-app .shn-tab[aria-selected='true'] { @apply tw-text-accent-600; }
+  #shastan-app .shn-tab[aria-selected='true']::after { content: ''; @apply tw-absolute tw-inset-x-0 -tw-bottom-px tw-h-[3px] tw-rounded-full tw-bg-accent-600; }
+
+  /* پنل کناری */
+  #shastan-app .shn-side-link { @apply tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-px-3 tw-py-2.5 tw-text-sm tw-font-bold tw-text-ink-muted tw-transition hover:tw-bg-slate-100 hover:tw-text-ink; }
+  #shastan-app .shn-side-link.is-active { @apply tw-bg-brand-50 tw-text-brand-700; }
+
+  #shastan-app .shn-login-error:empty { display: none; }
+  #shastan-app .shn-skeleton { @apply tw-animate-pulse tw-rounded-lg tw-bg-slate-200/80; }
+  #shastan-app .shn-prose p + p { margin-top: .75rem; }
+  #shastan-app .shn-line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #shastan-app .shn-line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+/* Hero: گرادیان قرمز → آبی قالب اولیه، بدون تصویر خارجی */
+.shn-hero {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,.08) 0, transparent 35%),
+    linear-gradient(135deg, rgba(161, 34, 34, .92) 0%, rgba(12, 74, 110, .96) 70%, #0c3a5a 100%);
+}
+.shn-hero-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+}
+.shn-header { background: #008000; }
+.shn-header.is-scrolled { box-shadow: 0 8px 24px rgba(0, 40, 0, .25); }
+.shn-logo-mark { background: linear-gradient(to top right, #0284c7, #22d3ee); }
+
+.shn-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.shn-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #shastan-app *, #shastan-app *::before, #shastan-app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  .shn-header, .shn-footer, .shn-topbar, .shn-no-print { display: none !important; }
+}

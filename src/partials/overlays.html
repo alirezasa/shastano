@@ -1,0 +1,17 @@
+  <!-- جستجو -->
+  <div id="shn-search" class="tw-fixed tw-inset-0 tw-z-[60]" hidden>
+    <div class="tw-absolute tw-inset-0 tw-bg-slate-950/70 tw-backdrop-blur-sm" data-shn-close></div>
+    <div class="tw-relative tw-mx-auto tw-mt-24 tw-w-[92%] tw-max-w-2xl">
+      <form class="tw-flex tw-items-center tw-gap-3 tw-rounded-2xl tw-bg-white tw-p-3 tw-shadow-2xl" role="search" data-shn="search-form">
+        <i class="fa-solid fa-magnifying-glass tw-ms-2 tw-text-ink-soft" aria-hidden="true"></i>
+        <label for="shn-search-input" class="tw-sr-only">جستجو در مسائل فناورانه</label>
+        <input id="shn-search-input" name="q" type="search" class="tw-flex-1 tw-border-0 tw-bg-transparent tw-py-2 tw-text-base focus:tw-outline-none" placeholder="جستجو در مسائل فناورانه، شرکت‌ها و دستاوردها…" autocomplete="off">
+        <button type="submit" class="shn-btn shn-btn-primary">جستجو</button>
+      </form>
+      <p class="tw-mt-3 tw-text-center tw-text-xs tw-text-white/70">کلید Esc برای بستن</p>
+    </div>
+  </div>
+  <!-- محل مودال‌ها، پنل‌های کناری و پیام‌ها -->
+  <div data-shn="modal-root"></div>
+  <div data-shn="toast-root" class="tw-fixed tw-bottom-5 tw-left-5 tw-z-[80] tw-flex tw-flex-col tw-gap-2" aria-live="polite"></div>
+  <div data-shn="dev-root"></div>
