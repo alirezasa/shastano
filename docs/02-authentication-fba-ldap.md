@@ -161,7 +161,7 @@ dist/sharepoint/layouts/Shastan/assets/…   (CSS، فونت، آیکن)
 
 - فقط HTTPS؛ HSTS در IIS.
 - **Account Lockout Policy** در AD فعال باشد (محافظت در برابر حدس رمز). چون ورود از اینترنت است، یک **Reverse Proxy / WAF** جلوی سرور، نرخ درخواست به `login.aspx` را محدود کند.
-- قابلیت **Limited-access user permission lockdown mode** روی Site Collection فعال بماند (کاربر ناشناس به فرم‌های لیست و `_layouts` دسترسی نداشته باشد).
+- قابلیت **Limited-access user permission lockdown mode** خاموش است، چون REST را برای کاربر ناشناس می‌بندد؛ حفاظت لیست‌های غیرعمومی با AnonymousPermMask خالی انجام می‌شود (بخش ۵ راهنمای استقرار). فرم‌ها و نمای لیست‌های عمومی فقط همان داده‌ی منتشرشده را نشان می‌دهند.
 - مدت اعتبار کوکی FBA: `Set-SPSecurityTokenServiceConfig -FormsTokenLifetime 60` (دقیقه) و در صورت نیاز `-LogonTokenCacheExpirationWindow`.
 - ⚠️ پشتیبانی SharePoint Server 2019 در ۱۴ ژوئیه‌ی ۲۰۲۶ تمام شده است؛ آخرین CU نصب باشد و مهاجرت به Subscription Edition برنامه‌ریزی شود.
 

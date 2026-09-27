@@ -127,10 +127,16 @@ if (Get-SPFeature -Web $web.Url -Identity MDSFeature -ErrorAction SilentlyContin
   Disable-SPFeature -Identity MDSFeature -Url $web.Url -Confirm:$false
   Write-Ok 'Minimal Download Strategy خاموش شد'
 }
-if (-not (Get-SPFeature -Site $site.Url -Identity ViewFormPagesLockDown -ErrorAction SilentlyContinue)) {
-  Enable-SPFeature -Identity ViewFormPagesLockDown -Url $site.Url
-  Write-Ok 'Limited-access user permission lockdown mode فعال شد'
-} else { Write-Ok 'Lockdown mode فعال است' }
+# Lockdown Mode مجوز «Use Remote Interfaces» را از کاربر ناشناس می‌گیرد و REST (که صفحات عمومی با آن داده
+# می‌خوانند) برای ناشناس کار نمی‌کند؛ پس خاموش می‌شود. لیست‌های غیرعمومی با AnonymousPermMask خالی محافظت می‌شوند.
+$lockdown = Get-SPFeature -Site $site.Url -Identity ViewFormPagesLockDown -ErrorAction SilentlyContinue
+if ($config.KeepLockdownMode) {
+  if (-not $lockdown) { Enable-SPFeature -Identity ViewFormPagesLockDown -Url $site.Url }
+  Write-Note 'Lockdown mode روشن نگه داشته شد (KeepLockdownMode)؛ کاربران ناشناس ممکن است داده‌ها را نبینند.'
+} elseif ($lockdown) {
+  Disable-SPFeature -Identity ViewFormPagesLockDown -Url $site.Url -Confirm:$false
+  Write-Ok 'Lockdown mode خاموش شد (لازم برای خواندن REST توسط کاربر ناشناس)'
+} else { Write-Ok 'Lockdown mode خاموش است' }
 
 # ---------------------------------------------------------------- ۳. سطوح دسترسی و گروه‌ها
 Write-Step 'سطوح دسترسی و گروه‌ها'
@@ -212,11 +218,15 @@ if (-not $web.HasUniqueRoleAssignments) { $web.BreakRoleInheritance($true) }
 foreach ($g in @($gVisitors, $gReviewers, $gAdmins) + @($companyGroups.Values)) { Grant $web $g $roleRead }
 $web.AnonymousState = [Microsoft.SharePoint.SPWeb+WebAnonymousState]::Enabled   # «Lists and libraries»
 $web.Update()
+# REST برای ناشناس به «Use Remote Interfaces» در سطح سایت نیاز دارد (بدون دادن حق خواندن همه‌ی لیست‌ها)
+$webAnon = [Microsoft.SharePoint.SPBasePermissions]'Open, ViewPages, UseRemoteAPIs, UseClientIntegration'
+$web.AnonymousPermMask64 = [Microsoft.SharePoint.SPBasePermissions]([UInt64]$web.AnonymousPermMask64 -bor [UInt64]$webAnon)
+$web.Update()
 Write-Ok 'مجوزهای سطح سایت و دسترسی ناشناس «فقط لیست‌ها و کتابخانه‌های مشخص»'
 
 # ---------------------------------------------------------------- ۴. لیست‌ها
 Write-Step 'لیست‌ها و کتابخانه‌ها'
-$anonView = [Microsoft.SharePoint.SPBasePermissions]'ViewListItems, OpenItems, ViewVersions, Open, ViewPages'
+$anonView = [Microsoft.SharePoint.SPBasePermissions]'ViewListItems, OpenItems, ViewVersions, Open, ViewPages, UseRemoteAPIs, UseClientIntegration'
 
 function Get-FieldXml($f) {
   $n = $f.name

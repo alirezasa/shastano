@@ -53,12 +53,15 @@ async function getAll(url) {
 }
 
 // ---------- ساخت Query ----------
-const COMMON = ['Id', 'Created', 'Modified', 'ItemCode', 'WorkflowStatus', 'OData__ModerationStatus', 'SubmittedOn', 'PublishedOn', 'ReviewedOn', 'ReviewComments', 'Author/Title', 'Reviewer/Title'];
+const COMMON = ['Id', 'Created', 'Modified', 'ItemCode', 'WorkflowStatus', 'OData__ModerationStatus', 'SubmittedOn', 'PublishedOn', 'ReviewedOn', 'ReviewComments'];
 
-function selectFor(type) {
+// isPublic: کاربر ناشناس به لیست اطلاعات کاربران دسترسی ندارد؛ expand ستون‌های کاربر (Author/Reviewer)
+// باعث رد شدن کل درخواست می‌شود. پس در صفحات عمومی این ستون‌ها خوانده نمی‌شوند.
+function selectFor(type, { isPublic = false } = {}) {
   const def = TYPES[type];
   const select = [...COMMON];
-  const expand = new Set(['Author', 'Reviewer']);
+  const expand = new Set();
+  if (!isPublic) { select.push('Author/Title', 'Reviewer/Title'); expand.add('Author'); expand.add('Reviewer'); }
   if (!def.noCompany) { select.push('Company/Id', 'Company/Title'); expand.add('Company'); }
   if (type === 'companies') select.push('CompanyCode', 'Icon');
   for (const f of def.fields) {
@@ -67,7 +70,7 @@ function selectFor(type) {
       else { select.push('Attachments', 'AttachmentFiles/FileName', 'AttachmentFiles/ServerRelativeUrl'); expand.add('AttachmentFiles'); }
     } else select.push(f.name);
   }
-  return `$select=${[...new Set(select)].join(',')}&$expand=${[...expand].join(',')}`;
+  return `$select=${[...new Set(select)].join(',')}${expand.size ? `&$expand=${[...expand].join(',')}` : ''}`;
 }
 
 function shape(type, r) {
@@ -134,7 +137,7 @@ export const getCategories = () => cached('shn.categories', async () => (await g
 
 export async function getPublicItems(type) {
   return cached(`shn.pub.${type}`, async () => {
-    const rows = await getAll(`${listUrl(typeList(type))}/items?${selectFor(type)}&$filter=${encodeURIComponent(PUBLIC_FILTER)}&$orderby=Id desc&$top=500`);
+    const rows = await getAll(`${listUrl(typeList(type))}/items?${selectFor(type, { isPublic: true })}&$filter=${encodeURIComponent(PUBLIC_FILTER)}&$orderby=Id desc&$top=500`);
     return rows.map((r) => shape(type, r));
   });
 }
