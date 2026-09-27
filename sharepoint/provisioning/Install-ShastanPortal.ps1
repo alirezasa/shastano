@@ -70,6 +70,29 @@ $site = Get-SPSite $config.SiteUrl
 $web = $site.RootWeb
 $webApp = $site.WebApplication
 Write-Host "سایت: $($web.Url)   |   Web Application: $($webApp.Url)   |   شرکت‌ها: $($companies.Count)"
+# ---------------------------------------------------------------- بررسی مجوز حساب اجراکننده
+# Farm Admin بودن برای تغییر محتوای سایت کافی نیست؛ حساب باید Site Collection Admin باشد یا
+# در User Policy مربوط به Web Application دسترسی Full Control داشته باشد.
+$runAs = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+$hasFull = $false
+try { $hasFull = $web.DoesUserHavePermissions([Microsoft.SharePoint.SPBasePermissions]::FullMask) } catch { }
+if (-not $hasFull) {
+  $claim = "i:0#.w|$($runAs.ToLower())"
+  throw @"
+حساب «$runAs» روی سایت $($web.Url) دسترسی Full Control ندارد (Access denied).
+یکی از دو راه زیر را در همین SharePoint Management Shell اجرا کنید و سپس اسکریپت را دوباره اجرا کنید:
+
+  # راه ۱ (پیشنهادی): Full Control از طریق User Policy وب اپلیکیشن
+  `$wa = Get-SPWebApplication "$($web.Site.WebApplication.Url)"
+  `$p = `$wa.Policies.Add("$claim", "Shastan Installer")
+  `$p.PolicyRoleBindings.Add(`$wa.PolicyRoles.GetSpecialRole("FullControl"))
+  `$wa.Update()
+
+  # راه ۲: مدیر دوم Site Collection
+  Set-SPSite -Identity "$($web.Site.Url)" -SecondaryOwnerAlias "$runAs"
+"@
+}
+Write-Host "حساب اجرا: $runAs (Full Control ✔)"
 if ($WhatIfOnly) { Write-Note 'حالت WhatIfOnly: تغییری اعمال نشد.'; return }
 
 # ---------------------------------------------------------------- ۱. Web Application
