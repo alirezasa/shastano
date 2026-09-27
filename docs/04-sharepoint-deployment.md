@@ -27,7 +27,7 @@
 |------|-------------------|
 | آدرس Site Collection | `http://srv-shp-web:8080` — اگر سکو در ریشه نیست (مثلاً `/sites/innovation`) در گام ۲ اعلام شود |
 | حساب اجرا | Farm Administrator + Site Collection Administrator، روی سرور شیرپوینت |
-| نام دامنه‌ی AD | در مثال‌ها `SHASTAN` — با نام واقعی جایگزین کنید |
+| نام دامنه‌ی AD | `AD.SHASTANGROUP.IR` (اسکریپت آن را خودکار به نام کوتاه NetBIOS دامنه‌ی سرور تبدیل می‌کند) |
 | فهرست شرکت‌های تابعه | کد (لاتین، مثل `001`)، نام، دسته‌بندی، گروه AD |
 | دسته‌بندی شرکت‌ها | مثلاً پتروشیمی، نفت و گاز، … |
 | ایمیل اطلاع‌رسانی هلدینگ | برای پیشنهادها، پیام‌ها و درخواست‌های جدید |
@@ -77,8 +77,8 @@ dist/sharepoint/
   "EnableAnonymousOnWebApplication": true,
   "CompaniesCsv": "companies.csv",
   "Categories": ["پتروشیمی", "نفت و گاز", "پالایش و روانکار", "خدمات مهندسی", "سرمایه‌گذاری"],
-  "HoldingAdminsMembers": ["SHASTAN\\SHN-Holding-Admins"],
-  "HoldingReviewersMembers": ["SHASTAN\\SHN-Holding-Reviewers"],
+  "HoldingAdminsMembers": ["AD.SHASTANGROUP.IR\\SHN-Holding-Admins"],
+  "HoldingReviewersMembers": ["AD.SHASTANGROUP.IR\\SHN-Holding-Reviewers"],
   "VisitorsMembers": ["c:0(.s|true"],
   "HoldingNotifyEmails": "innovation@shastan.ir"
 }
@@ -86,16 +86,18 @@ dist/sharepoint/
 - `EnableAnonymousOnWebApplication`: دسترسی ناشناس را روی Zone Web Application روشن می‌کند (برای کاربران عمومی بدون ورود لازم است).
 - `c:0(.s|true` یعنی «همه‌ی کاربران واردشده‌ی Windows»؛ فقط حق خواندن صفحات و محتوای عمومی را می‌گیرند.
 
-**`provisioning\companies.csv`** — از روی `companies.sample.csv` بسازید و با Excel یا Notepad با کدگذاری **UTF-8** ذخیره کنید:
-```csv
-CompanyCode,Title,Category,Icon,ADGroup
-001,پتروشیمی …,پتروشیمی,fa-flask,SHASTAN\SHN-Company-001
-002,…,نفت و گاز,fa-oil-well,SHASTAN\SHN-Company-002
+**`provisioning\companies.csv`** — فهرست فعلی در مخزن آمده است؛ شرکت‌های دیگر را اضافه کنید. جداکننده می‌تواند
+**Tab** (کپی مستقیم از Excel)، کاما یا `;` باشد؛ فایل با کدگذاری **UTF-8** ذخیره شود:
 ```
+CompanyCode	Title	Category	Icon	ADGroup
+001	شرکت پتروشیمی بوشهر	پتروشیمی	fa-flask	AD.SHASTANGROUP.IR\SHN-BUPC
+002	شرکت پتروشیمی مرجان	پتروشیمی	fa-flask	AD.SHASTANGROUP.IR\SHN-MARJ
+```
+اسکریپت قبل از هر تغییری فایل را بررسی می‌کند (کد تکراری، نام خالی، گروه AD بدون `\`) و در صورت اشکال متوقف می‌شود.
 - `CompanyCode`: فقط حروف لاتین/عدد؛ نام پوشه‌ی شرکت در لیست‌ها می‌شود و **بعداً تغییر ندهید**.
 - `Category`: باید یکی از `Categories` بالا باشد.
 - `Icon`: نام آیکن [FontAwesome 6](https://fontawesome.com/search?o=r&m=free&s=solid) (تا زمانی که لوگو بارگذاری شود).
-- `ADGroup`: گروه AD کاربران آن شرکت (چند گروه با `;`).
+- `ADGroup`: گروه AD کاربران آن شرکت به شکل `DOMAIN\Group` (چند گروه با `|`). نام گروه آزاد است؛ گروه شیرپوینت متناظر همیشه `SHN-Company-<کد>` نام می‌گیرد.
 
 ## ۵. نصب لیست‌ها، گروه‌ها و مجوزها
 

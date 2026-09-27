@@ -43,11 +43,28 @@ $csvPath = Join-Path $PSScriptRoot $config.CompaniesCsv
 if (-not (Test-Path $csvPath)) {
   throw "فایل شرکت‌ها یافت نشد: $csvPath`nاز روی companies.sample.csv یک فایل companies.csv بسازید و اطلاعات واقعی شرکت‌ها را وارد کنید."
 }
-$companies = @(Import-Csv $csvPath -Encoding UTF8)
+# جداکننده خودکار: Tab (کپی از Excel)، کاما، یا ; (Excel فارسی/اروپایی)
+$header = (Get-Content $csvPath -Encoding UTF8 -TotalCount 1)
+$delimiter = if ($header -match "`t") { "`t" } elseif ($header -match ';' -and $header -notmatch ',') { ';' } else { ',' }
+$companies = @(Import-Csv $csvPath -Encoding UTF8 -Delimiter $delimiter | Where-Object { $_.CompanyCode -and $_.CompanyCode.Trim() })
+foreach ($c in $companies) { foreach ($p in $c.PSObject.Properties) { if ($p.Value -is [string]) { $p.Value = $p.Value.Trim() } } }
+
+# اعتبارسنجی قبل از هر تغییری در شیرپوینت
+$problems = @()
 foreach ($c in $companies) {
-  if ($c.CompanyCode -notmatch '^[A-Za-z0-9_-]{1,20}$') { throw "کد شرکت نامعتبر است: '$($c.CompanyCode)' (فقط حروف لاتین، عدد، - و _)" }
+  if ($c.CompanyCode -notmatch '^[A-Za-z0-9_-]{1,20}$') { $problems += "کد شرکت نامعتبر: '$($c.CompanyCode)' (فقط حروف لاتین، عدد، - و _)" }
+  if (-not $c.Title) { $problems += "نام شرکت $($c.CompanyCode) خالی است" }
+  foreach ($g in ($c.ADGroup -split '[;|]')) {
+    $g = $g.Trim()
+    if ($g -and $g -notmatch '^[^\\]+\\[^\\]+$' -and $g -notmatch '^c:0') {
+      $problems += "گروه AD شرکت $($c.CompanyCode) نامعتبر است: '$g' — شکل درست: DOMAIN\GroupName (بک‌اسلش بین دامنه و نام گروه جا افتاده؟)"
+    }
+  }
 }
-if (($companies.CompanyCode | Select-Object -Unique).Count -ne $companies.Count) { throw 'کد شرکت تکراری در companies.csv وجود دارد.' }
+$dup = $companies | Group-Object CompanyCode | Where-Object Count -gt 1
+if ($dup) { $problems += "کد شرکت تکراری: $(($dup | ForEach-Object Name) -join ', ')" }
+if (-not $companies.Count) { $problems += 'هیچ شرکتی در companies.csv نیست (ستون‌ها: CompanyCode, Title, Category, Icon, ADGroup)' }
+if ($problems) { throw ("اشکال در companies.csv:`n - " + ($problems -join "`n - ")) }
 
 $site = Get-SPSite $config.SiteUrl
 $web = $site.RootWeb
@@ -124,9 +141,19 @@ function Ensure-Group([string]$name, [string]$description) {
   }
   return $g
 }
+# DOMAIN\name: اگر نام کامل دامنه‌ی خود سرور (مثل AD.SHASTANGROUP.IR) آمده باشد، به نام کوتاه (NetBIOS) تبدیل می‌شود
+function Resolve-Login([string]$login) {
+  $login = $login.Trim()
+  if ($login -match '^([^\\]+)\\(.+)$') {
+    $domain = $Matches[1]; $name = $Matches[2]
+    if ($env:USERDNSDOMAIN -and $env:USERDOMAIN -and $domain -ieq $env:USERDNSDOMAIN) { return "$($env:USERDOMAIN)\$name" }
+  }
+  return $login
+}
 function Add-Members($group, $logins) {
-  foreach ($login in @($logins)) {
-    if ([string]::IsNullOrWhiteSpace($login)) { continue }
+  foreach ($raw in @($logins)) {
+    if ([string]::IsNullOrWhiteSpace($raw)) { continue }
+    $login = Resolve-Login $raw
     try { $group.AddUser($web.EnsureUser($login)); Write-Ok "$login → $($group.Name)" }
     catch { Write-Note "افزودن $login به $($group.Name) ناموفق بود: $($_.Exception.Message)" }
   }
@@ -150,7 +177,7 @@ Add-Members $gVisitors $config.VisitorsMembers
 $companyGroups = @{}
 foreach ($c in $companies) {
   $g = Ensure-Group "SHN-Company-$($c.CompanyCode)" "کاربران شرکت $($c.Title)"
-  Add-Members $g ($c.ADGroup -split ';')
+  Add-Members $g ($c.ADGroup -split '[;|]')
   $companyGroups[$c.CompanyCode] = $g
 }
 
