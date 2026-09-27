@@ -178,7 +178,10 @@ function Add-Members($group, $logins) {
     if ([string]::IsNullOrWhiteSpace($raw)) { continue }
     $login = Resolve-Login $raw
     try { $group.AddUser($web.EnsureUser($login)); Write-Ok "$login → $($group.Name)" }
-    catch { Write-Note "افزودن $login به $($group.Name) ناموفق بود: $($_.Exception.Message)" }
+    catch {
+      Write-Note "افزودن $login به $($group.Name) ناموفق بود: $($_.Exception.Message)"
+      Write-Note "  → گروه در AD وجود دارد و از نوع Security است؟ بررسی: net group `"$($login.Split('\')[-1])`" /domain  — پس از ساخت گروه، اسکریپت را دوباره اجرا کنید."
+    }
   }
 }
 function Grant($securable, $principal, $roleDef) {
@@ -254,7 +257,10 @@ function Ensure-Field($list, $f) {
   }
   $field = $list.Fields.GetFieldByInternalName($f.name)
   $field.Title = $f.label
-  if ($f.indexed -and -not $field.Indexed) { $field.Indexed = $true }
+  # در SP 2019 ویژگی Indexed ستون Lookup فقط‌نوشتنی است؛ پس بدون خواندن، مستقیم تنظیم می‌شود
+  if ($f.indexed) {
+    try { $field.Indexed = $true } catch { Write-Note "ایندکس ستون $($f.name) در $($list.Title) تنظیم نشد: $($_.Exception.Message)" }
+  }
   $field.Update()
   $view = $list.DefaultView
   if ($f.type -ne 'Note' -and -not $view.ViewFields.Exists($f.name)) { $view.ViewFields.Add($field); $view.Update() }
