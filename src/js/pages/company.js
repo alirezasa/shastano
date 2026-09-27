@@ -1,7 +1,7 @@
 import { html, mount, shn, qs, paragraphs, safeUrl } from '../core/util.js';
 import { faNum } from '../core/format.js';
 import { getPublicItem, getPublicItems, getCompanyContact, getCurrentUser } from '../data/repository.js';
-import { breadcrumb, challengeCard, itemCard, icon, emptyState, errorState } from '../ui/components.js';
+import { breadcrumb, challengeCard, itemCard, icon, emptyState, errorState, companyMark } from '../ui/components.js';
 import { url, loginUrl } from '../ui/urls.js';
 import { bindItemDialogs } from './shared.js';
 import { TYPES } from '../schema.js';
@@ -45,7 +45,7 @@ export async function init() {
         ${breadcrumb([{ label: 'صفحه اصلی', href: url('home') }, { label: 'شرکت‌های تابعه', href: url('companies') }, { label: c.Title }])}
         <div class="tw-mt-5 tw-flex tw-flex-col tw-gap-6 md:tw-flex-row md:tw-items-center md:tw-justify-between">
           <div class="tw-flex tw-items-center tw-gap-4">
-            <span class="tw-flex tw-h-20 tw-w-20 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-3xl tw-bg-ocean-600 tw-text-4xl tw-text-white tw-shadow-lg">${icon(c.Icon || 'fa-building')}</span>
+            ${companyMark(c, 'tw-h-20 tw-w-20 tw-rounded-3xl tw-bg-ocean-600 tw-text-4xl tw-text-white tw-shadow-lg')}
             <div>
               <h1 class="tw-text-2xl tw-font-bold sm:tw-text-3xl">${c.Title}</h1>
               <div class="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-ink-muted">

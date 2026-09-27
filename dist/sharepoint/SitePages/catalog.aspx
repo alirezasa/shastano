@@ -1,0 +1,19 @@
+<%@ Page Language="C#" MasterPageFile="~sitecollection/_catalogs/masterpage/shastan.master" Inherits="Microsoft.SharePoint.WebPartPages.WebPartPage, Microsoft.SharePoint, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" %>
+<asp:Content ContentPlaceHolderID="PlaceHolderPageTitle" runat="server">دستاوردها | سکوی نوآوری و فناوری شستان</asp:Content>
+<asp:Content ContentPlaceHolderID="PlaceHolderAdditionalPageHead" runat="server"><meta name="description" content="دستاوردهای فناورانه‌ی شرکت‌های تابعه‌ی هلدینگ شستان"></asp:Content>
+<asp:Content ContentPlaceHolderID="PlaceHolderMain" runat="server">
+<div data-shn-page="catalog" hidden></div>
+<div data-shn="catalog-head"></div>
+    <div class="shn-container tw-py-8">
+      <form class="shn-card tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-p-4 sm:tw-grid-cols-2 lg:tw-grid-cols-4" data-shn="catalog-filters" role="search">
+        <div><label for="cat-q" class="tw-sr-only">جستجو</label><input id="cat-q" name="q" type="search" class="shn-input" placeholder="جستجو…"></div>
+        <div data-only="company"><label for="cat-company" class="tw-sr-only">شرکت</label><select id="cat-company" name="company" class="shn-input"><option value="all">همه‌ی شرکت‌ها</option></select></div>
+        <div data-only="domain"><label for="cat-domain" class="tw-sr-only">حوزه</label><select id="cat-domain" name="domain" class="shn-input"><option value="all">همه‌ی حوزه‌ها</option></select></div>
+        <div><label for="cat-sort" class="tw-sr-only">مرتب‌سازی</label><select id="cat-sort" name="sort" class="shn-input"><option value="newest">جدیدترین</option><option value="date">بر اساس تاریخ</option><option value="title">عنوان</option></select></div>
+      </form>
+      <p class="tw-mb-4 tw-text-sm tw-text-ink-muted" data-shn="catalog-count">&nbsp;</p>
+      <div class="tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-2 lg:tw-grid-cols-3" data-shn="catalog" aria-live="polite"></div>
+      <div class="tw-mt-8" data-shn="catalog-pager"></div>
+    </div>
+
+</asp:Content>

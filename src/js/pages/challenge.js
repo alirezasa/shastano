@@ -1,7 +1,7 @@
 import { html, mount, shn, qs, paragraphs } from '../core/util.js';
 import { fmtDate, faNum, daysLeft } from '../core/format.js';
 import { getPublicItem, getPublicItems, isOpenCall, submitProposal, queryPublic } from '../data/repository.js';
-import { breadcrumb, callBadge, priorityBadge, domainChip, challengeCard, icon, errorState, emptyState, fileSize } from '../ui/components.js';
+import { breadcrumb, callBadge, priorityBadge, domainChip, challengeCard, icon, errorState, emptyState, fileSize, companyMark } from '../ui/components.js';
 import { captchaField, loadCaptcha, enhanceForm, validateFiles, showErrors } from '../ui/forms.js';
 import { toast, openDialog } from '../ui/overlay.js';
 import { url } from '../ui/urls.js';
@@ -114,7 +114,7 @@ export async function init() {
         </div>
         ${company ? html`<a href="${url('company', { id: company.Id })}" class="shn-card shn-card-hover tw-block tw-p-6">
           <span class="tw-text-xs tw-font-bold tw-text-ink-muted">شرکت صاحب مسئله</span>
-          <span class="tw-mt-3 tw-flex tw-items-center tw-gap-3"><span class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-ocean-50 tw-text-xl tw-text-ocean-700">${icon(company.Icon || 'fa-building')}</span>
+          <span class="tw-mt-3 tw-flex tw-items-center tw-gap-3">${companyMark(company, 'tw-h-12 tw-w-12 tw-rounded-xl tw-bg-ocean-50 tw-text-xl tw-text-ocean-700')}
           <span><b class="tw-block">${company.Title}</b><span class="tw-text-xs tw-text-ink-muted">${company.CategoryTitle}</span></span></span>
           <p class="tw-mt-3 tw-text-xs tw-leading-6 tw-text-ink-muted">${company.ShortDesc}</p></a>` : ''}
       </aside>

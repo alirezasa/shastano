@@ -1,5 +1,5 @@
 // اجزای مشترک رابط کاربری (همه خروجی html`` امن دارند)
-import { html, raw } from '../core/util.js';
+import { html, raw, safeUrl } from '../core/util.js';
 import { fmtDate, faNum, daysLeft } from '../core/format.js';
 import { WORKFLOW, PRIORITIES, CALL_STATUS, TYPES, fieldOf, choiceLabel } from '../schema.js';
 import { url } from './urls.js';
@@ -24,6 +24,14 @@ export const icon = (name, cls = '') => {
   const base = /fa-(regular|brands)\b/.test(name) ? name : `fa-solid ${name}`;
   return html`<i class="${base} ${cls}" aria-hidden="true"></i>`;
 };
+
+/** لوگوی شرکت (در صورت وجود) یا آیکن؛ cls اندازه و رنگ قاب را تعیین می‌کند */
+export function companyMark(c, cls, iconCls = '') {
+  const logo = c?.Logo && safeUrl(c.Logo) !== '#' ? c.Logo : null;
+  return logo
+    ? html`<span class="${cls} tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white tw-border tw-border-surface-line"><img src="${logo}" alt="لوگوی ${c.Title || ''}" class="tw-h-full tw-w-full tw-object-contain tw-p-1" loading="lazy"></span>`
+    : html`<span class="${cls} tw-flex tw-shrink-0 tw-items-center tw-justify-center">${icon(c?.Icon || 'fa-building', iconCls)}</span>`;
+}
 
 export function statusBadge(status) {
   const s = WORKFLOW[status] || WORKFLOW.Draft;
@@ -115,7 +123,7 @@ export function companyCard(c, counts = {}) {
   return html`
   <article class="shn-card shn-card-hover tw-flex tw-flex-col tw-p-6">
     <div class="tw-flex tw-items-center tw-gap-3">
-      <span class="tw-flex tw-h-14 tw-w-14 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-2xl tw-bg-ocean-50 tw-text-2xl tw-text-ocean-700">${icon(c.Icon || 'fa-building')}</span>
+      ${companyMark(c, 'tw-h-14 tw-w-14 tw-rounded-2xl tw-bg-ocean-50 tw-text-2xl tw-text-ocean-700')}
       <div class="tw-min-w-0">
         <h3 class="tw-truncate tw-text-lg tw-font-bold"><a href="${url('company', { id: c.Id })}" class="hover:tw-text-ocean-700">${c.Title}</a></h3>
         ${c.CategoryTitle ? html`<span class="shn-chip tw-bg-slate-100 tw-text-slate-600">${c.CategoryTitle}</span>` : ''}

@@ -275,6 +275,7 @@ async function renderAdminForm(main, type, id) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { values, files, errors } = collectFields(form, type, { role: 'holding' });
+    if (def.library && !id && !files.length) errors.Attachments = 'فایل سند را انتخاب کنید.';
     if (!showErrors(form, errors)) return;
     try {
       await saveItem(type, id, values, { files });

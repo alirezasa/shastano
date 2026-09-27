@@ -50,7 +50,7 @@ function fieldControl(f, value, ctx) {
           ${icon('fa-cloud-arrow-up', 'tw-text-2xl tw-text-ocean-600')}
           <span><b class="tw-text-ocean-700">انتخاب فایل</b> یا رها کردن فایل در این قسمت</span>
           <span class="tw-text-xs">حداکثر ${faNum(MAX_FILE_MB)} مگابایت — ${ALLOWED_EXT.slice(0, 7).join('، ')}، …</span>
-          <input id="${id}" name="${f.name}" type="file" multiple class="tw-sr-only" data-files accept="${ALLOWED_EXT.map((x) => `.${x}`).join(',')}">
+          <input id="${id}" name="${f.name}" type="file" ${f.single ? '' : raw('multiple')} class="tw-sr-only" data-files accept="${ALLOWED_EXT.map((x) => `.${x}`).join(',')}">
         </label>
         <ul class="tw-mt-2 tw-space-y-1 tw-text-xs" data-file-list></ul>
       </div>`;
@@ -167,7 +167,7 @@ export function enhanceForm(root) {
         <span class="tw-flex tw-items-center tw-gap-2 tw-truncate">${icon('fa-file')}<span class="tw-truncate">${f.name}</span><span class="tw-text-ink-soft">${fileSize(f.size)}</span></span>
         <button type="button" class="tw-text-accent-600" data-remove-file="${i}" aria-label="حذف فایل">${icon('fa-trash-can')}</button></li>`)}`);
     };
-    const add = (files) => { inp._files = [...inp._files, ...Array.from(files)].slice(0, 10); render(); };
+    const add = (files) => { inp._files = inp.multiple ? [...inp._files, ...Array.from(files)].slice(0, 10) : Array.from(files).slice(0, 1); render(); };
     inp.addEventListener('change', () => { add(inp.files); inp.value = ''; });
     list?.addEventListener('click', (e) => {
       const b = e.target.closest('[data-remove-file]');

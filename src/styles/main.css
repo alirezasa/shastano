@@ -21,11 +21,17 @@
 @tailwind utilities;
 
 @layer base {
+  /* specificity همه‌ی ریست‌ها (1,0,0) است: از قواعد corev15.css شیرپوینت (بدون id) قوی‌تر و
+     از utility/کامپوننت‌های سکو (#shastan-app .class = 1,1,0) ضعیف‌تر. */
   html { -webkit-text-size-adjust: 100%; }
   body.shn-body { margin: 0; background: theme('colors.surface.page'); }
+  /* شیرپوینت body را overflow:hidden می‌کند (برای ریبون)؛ صفحات سکو اسکرول عادی دارند */
+  html:has(> body.shn-body), body.shn-body { overflow: auto !important; height: auto !important; }
+  .shn-sp-form { margin: 0; }
 
   #shastan-app {
     font-family: theme('fontFamily.sans');
+    font-size: 16px;
     color: theme('colors.ink.DEFAULT');
     background: theme('colors.surface.page');
     line-height: 1.7;
@@ -36,21 +42,21 @@
     display: flex;
     flex-direction: column;
   }
-  :where(#shastan-app) *, :where(#shastan-app) *::before, :where(#shastan-app) *::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: theme('colors.surface.line'); }
-  :where(#shastan-app) h1, :where(#shastan-app) h2, :where(#shastan-app) h3, :where(#shastan-app) h4, :where(#shastan-app) p, :where(#shastan-app) ul, :where(#shastan-app) ol, :where(#shastan-app) figure, :where(#shastan-app) blockquote, :where(#shastan-app) dl, :where(#shastan-app) dd { margin: 0; }
-  :where(#shastan-app) h1, :where(#shastan-app) h2, :where(#shastan-app) h3, :where(#shastan-app) h4 { font-size: inherit; font-weight: 700; line-height: 1.5; color: inherit; }
-  :where(#shastan-app) ul, :where(#shastan-app) ol { list-style: none; padding: 0; }
-  :where(#shastan-app) a { color: inherit; text-decoration: none; }
-  :where(#shastan-app) img, :where(#shastan-app) svg { display: block; max-width: 100%; }
-  :where(#shastan-app) button, :where(#shastan-app) input, :where(#shastan-app) select, :where(#shastan-app) textarea {
-    font: inherit; color: inherit; margin: 0; background: transparent; line-height: inherit;
+  #shastan-app *, #shastan-app *::before, #shastan-app *::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: theme('colors.surface.line'); }
+  #shastan-app :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote, dl, dd) { margin: 0; }
+  #shastan-app :where(h1, h2, h3, h4, h5, h6) { font-size: inherit; font-weight: 700; line-height: 1.5; color: inherit; font-family: inherit; }
+  #shastan-app :where(ul, ol) { list-style: none; padding: 0; }
+  #shastan-app :where(a, a:link, a:visited, a:hover) { color: inherit; text-decoration: none; }
+  #shastan-app :where(img, svg) { display: block; max-width: 100%; border: 0; }
+  #shastan-app :where(button, input, select, textarea) {
+    font: inherit; color: inherit; margin: 0; padding: 0; background: transparent; line-height: inherit; min-width: 0; min-height: 0; box-shadow: none;
   }
-  :where(#shastan-app) button { cursor: pointer; padding: 0; }
-  :where(#shastan-app) button:disabled { cursor: not-allowed; opacity: .55; }
-  :where(#shastan-app) table { border-collapse: collapse; }
-  :where(#shastan-app) [hidden] { display: none !important; }
-  :where(#shastan-app) :focus-visible { outline: 3px solid theme('colors.ocean.300'); outline-offset: 2px; border-radius: 6px; }
-  :where(#shastan-app) ::selection { background: theme('colors.brand.100'); }
+  #shastan-app :where(button, input[type=button], input[type=submit], input[type=reset]) { cursor: pointer; }
+  #shastan-app :where(button:disabled, input:disabled) { cursor: not-allowed; opacity: .55; }
+  #shastan-app :where(table) { border-collapse: collapse; }
+  #shastan-app [hidden] { display: none !important; }
+  #shastan-app :where(:focus-visible) { outline: 3px solid theme('colors.ocean.300'); outline-offset: 2px; border-radius: 6px; }
+  #shastan-app ::selection { background: theme('colors.brand.100'); }
 }
 
 @layer components {

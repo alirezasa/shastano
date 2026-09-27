@@ -1,0 +1,90 @@
+<%@ Master Language="C#" %>
+<%@ Register TagPrefix="SharePoint" Namespace="Microsoft.SharePoint.WebControls" Assembly="Microsoft.SharePoint, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" %>
+<%@ Register TagPrefix="WebPartPages" Namespace="Microsoft.SharePoint.WebPartPages" Assembly="Microsoft.SharePoint, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" %>
+<%--
+  مستر پیج سکوی نوآوری و فناوری شستان — SharePoint Server 2019
+  فقط صفحات سکو (SitePages / PanelPages) از این مستر پیج استفاده می‌کنند؛ صفحات سیستمی و تنظیمات سایت
+  همچنان با seattle.master باز می‌شوند تا مدیریت فنی سایت دست‌نخورده بماند.
+  این فایل توسط build ساخته می‌شود (dist/sharepoint/masterpage) — مستقیماً در dist ویرایش نکنید.
+
+  ساختار: فرم سرور شیرپوینت (ScriptManager، FormDigest، ...) جدا از محتوای سکو قرار دارد،
+  چون صفحات سکو فرم‌های HTML خودشان را دارند و فرم تو در تو در HTML مجاز نیست.
+--%>
+<!DOCTYPE html>
+<SharePoint:SPHtmlTag runat="server" id="SPHtmlTag" dir="rtl">
+<head runat="server">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#008000">
+  <SharePoint:RobotsMetaTag runat="server" />
+  <SharePoint:PageTitle runat="server"><asp:ContentPlaceHolder ID="PlaceHolderPageTitle" runat="server">سکوی نوآوری و فناوری شستان</asp:ContentPlaceHolder></SharePoint:PageTitle>
+  <SharePoint:StartScript runat="server" />
+  <SharePoint:CssLink runat="server" Version="15" />
+  <SharePoint:ScriptLink language="javascript" name="core.js" OnDemand="true" runat="server" Localizable="false" />
+  <SharePoint:ScriptLink language="javascript" name="sp.js" OnDemand="true" runat="server" Localizable="false" />
+  <SharePoint:CustomJSUrl runat="server" />
+  <SharePoint:SoapDiscoveryLink runat="server" />
+  <asp:ContentPlaceHolder ID="PlaceHolderAdditionalPageHead" runat="server" />
+  <SharePoint:DelegateControl runat="server" ControlId="AdditionalPageHead" AllowMultipleControls="true" />
+  <link rel="icon" type="image/svg+xml" href="{{root}}assets/img/logo-mark.svg">
+  <link rel="preload" href="{{root}}assets/fonts/DanaFaNum-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{root}}assets/fonts/DanaFaNum-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{root}}assets/vendor/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="{{root}}assets/css/shastan.css?v={{version}}">
+  <script>window.SHASTAN_CONFIG = { mode: 'sp' };</script>
+</head>
+<body class="shn-body">
+  <SharePoint:ImageLink runat="server" />
+  <SharePoint:SharePointForm runat="server" CssClass="shn-sp-form" onsubmit="if (typeof(_spFormOnSubmitWrapper) != 'undefined') {return _spFormOnSubmitWrapper();} else {return true;}">
+    <asp:ScriptManager ID="ScriptManager" runat="server" EnablePageMethods="false" EnablePartialRendering="true" EnableScriptGlobalization="false" EnableScriptLocalization="true" />
+    <WebPartPages:SPWebPartManager runat="server" />
+    <SharePoint:FormDigest runat="server" />
+    <asp:Panel runat="server" Visible="false">
+      <asp:ContentPlaceHolder ID="PlaceHolderFormDigest" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderSearchArea" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTitleBreadcrumb" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderGlobalNavigation" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderGlobalNavigationSiteMap" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderPageTitleInTitleArea" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderPageDescription" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderPageImage" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderSiteName" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTopNavBar" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderHorizontalNav" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderLeftNavBar" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderLeftNavBarTop" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderLeftNavBarDataSource" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderLeftActions" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderCalendarNavigator" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderQuickLaunchTop" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderQuickLaunchBottom" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderBodyAreaClass" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTitleAreaClass" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTitleAreaSeparator" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTitleLeftBorder" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderTitleRightMargin" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderBodyLeftBorder" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderBodyRightMargin" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderNavSpacer" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderMiniConsole" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderPageDescriptionRowAttr" runat="server" />
+      <asp:ContentPlaceHolder ID="PlaceHolderPageDescriptionRowAttr2" runat="server" />
+      <asp:ContentPlaceHolder ID="WSSDesignConsole" runat="server" />
+      <asp:ContentPlaceHolder ID="SPNavigation" runat="server" />
+    </asp:Panel>
+  </SharePoint:SharePointForm>
+
+  <div id="shastan-app" data-page="" data-root="{{root}}">
+    <a href="#shn-main" class="tw-sr-only focus:tw-not-sr-only focus:tw-fixed focus:tw-top-2 focus:tw-right-2 focus:tw-z-[100] focus:tw-rounded-lg focus:tw-bg-white focus:tw-px-4 focus:tw-py-2 focus:tw-font-bold">پرش به محتوای اصلی</a>
+<!--@include topbar-->
+<!--@include header-->
+    <main id="shn-main" class="tw-flex-1" tabindex="-1">
+      <asp:ContentPlaceHolder ID="PlaceHolderMain" runat="server" />
+    </main>
+<!--@include footer-->
+<!--@include overlays-->
+  </div>
+  <asp:ContentPlaceHolder ID="PlaceHolderUtilityContent" runat="server" />
+  <script src="{{root}}assets/js/shastan.js?v={{version}}"></script>
+</body>
+</SharePoint:SPHtmlTag>

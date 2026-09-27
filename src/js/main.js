@@ -16,7 +16,8 @@ const PAGES = { home, challenges, challenge, companies, company, catalog, contac
 async function boot() {
   const app = document.getElementById('shastan-app');
   if (!app) return;
-  const page = app.dataset.page;
+  // در شیرپوینت #shastan-app در مستر پیج است و شناسه‌ی صفحه در خود صفحه (data-shn-page) قرار دارد
+  const page = document.querySelector('[data-shn-page]')?.dataset.shnPage || app.dataset.page;
   try {
     const user = page === 'login' ? null : await initLayout(page);
     await PAGES[page]?.init(user);
