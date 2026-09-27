@@ -131,6 +131,10 @@ async function buildJs({ sp = false, outfile = join(ASSETS, 'js/shastan.js') } =
 //   SiteAssets/shastan/**       → کتابخانه‌ی Site Assets
 //   layouts/Shastan/**          → 16\TEMPLATE\LAYOUTS\Shastan روی همه‌ی سرورهای وب
 //   provisioning/**             → اسکریپت‌های PowerShell نصب و استقرار
+// ASP.NET فایل .aspx/.master بدون BOM را با کدگذاری ANSI ویندوز می‌خواند و متن فارسی خراب می‌شود
+const BOM = '\uFEFF';
+const withBom = (text) => (text.startsWith(BOM) ? text : BOM + text);
+
 const PAGE_DIRECTIVE = '<%@ Page Language="C#" MasterPageFile="~sitecollection/_catalogs/masterpage/shastan.master" Inherits="Microsoft.SharePoint.WebPartPages.WebPartPage, Microsoft.SharePoint, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" %>';
 
 function assertSafeMode(name, text) {
@@ -146,7 +150,7 @@ async function buildSharePointPackage() {
   master = spLinks(includePartials(master).replace('<!--@admin-link-->', adminLink)).replaceAll('{{version}}', VERSION);
   assertSafeMode('shastan.master', master);
   mkdirSync(join(SP_OUT, 'masterpage'), { recursive: true });
-  writeFileSync(join(SP_OUT, 'masterpage/shastan.master'), master);
+  writeFileSync(join(SP_OUT, 'masterpage/shastan.master'), withBom(master));
 
   // صفحات
   const pagesDir = join(SRC, 'pages');
@@ -168,7 +172,7 @@ ${src}
     assertSafeMode(name, aspx);
     const out = join(SP_OUT, SP_PAGES[name]);
     mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, aspx);
+    writeFileSync(out, withBom(aspx));
   }
 
   // assets + بسته‌ی جاوااسکریپت مخصوص شیرپوینت (بدون داده‌ی نمایشی)
@@ -179,10 +183,17 @@ ${src}
 
   // LAYOUTS (صفحه‌ی ورود FBA، هندلرهای فرم عمومی) و اسکریپت‌های PowerShell
   cpSync(join(ROOT, 'sharepoint/layouts'), join(SP_OUT, 'layouts'), { recursive: true });
+  for (const f of walk(join(SP_OUT, 'layouts')).filter((x) => /\.(aspx|ashx|master)$/i.test(x))) {
+    writeFileSync(f, withBom(readFileSync(f, 'utf8')));
+  }
   cpSync(ASSETS, join(SP_OUT, 'layouts/Shastan/assets'), { recursive: true });
   rmSync(join(SP_OUT, 'layouts/Shastan/assets/js'), { recursive: true, force: true }); // صفحه‌ی ورود JS ندارد
   cpSync(join(ROOT, 'sharepoint/provisioning'), join(SP_OUT, 'provisioning'), { recursive: true });
   writeFileSync(join(SP_OUT, 'provisioning/lists.json'), JSON.stringify({ lists: listDefinitions(), seed: SEED }, null, 2));
+
+  for (const f of walk(SP_OUT).filter((x) => /\.(aspx|ashx|master)$/i.test(x))) {
+    if (readFileSync(f)[0] !== 0xef) throw new Error(`missing UTF-8 BOM: ${relative(SP_OUT, f)}`);
+  }
 
   // بسته‌ی شیرپوینت نباید داده‌ی نمایشی داشته باشد
   const js = readFileSync(join(spAssets, 'js/shastan.js'), 'utf8');
