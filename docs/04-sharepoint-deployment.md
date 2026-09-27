@@ -152,7 +152,14 @@ Set-ExecutionPolicy -Scope Process Bypass
 **گروه‌ها و سطوح دسترسی**: `SHN-Holding-Admins` (Shastan Admin)، `SHN-Holding-Reviewers` (Shastan Reviewer)،
 `SHN-Visitors`، `SHN-Company-<کد>` (Shastan Contributor = ثبت و ویرایش بدون حذف).
 
-**سایر**: خاموش شدن MDS، فعال شدن Lockdown Mode، صفحه‌ی خانه = `SitePages/index.aspx`.
+**سایر**: خاموش شدن MDS، **خاموش شدن Lockdown Mode** (این قابلیت مجوز «Use Remote Interfaces» را از کاربر ناشناس می‌گیرد و صفحات عمومی داده‌ای نمایش نمی‌دهند)، مجوز Use Remote Interfaces برای ناشناس در سطح سایت، صفحه‌ی خانه = `SitePages/index.aspx`.
+لیست‌های غیرعمومی (`CompanyContacts`، `Proposals`، `ContactMessages`، `AuditLog`، `SiteSettings`، `PanelPages`) دسترسی ناشناس ندارند، پس خاموش بودن Lockdown آن‌ها را باز نمی‌کند.
+
+### بررسی دسترسی کاربر ناشناس
+```powershell
+.\Test-ShastanAnonymous.ps1
+```
+درخواست‌ها را بدون ورود (مثل مرورگر کاربر عمومی) ارسال می‌کند و برای صفحه، CSS، REST حوزه‌ها/شرکت‌ها/مسائل، لیست‌های محرمانه و کپچا نتیجه را با مقدار مورد انتظار مقایسه می‌کند.
 
 ## ۶. نصب فایل‌های سمت سرور (روی همه‌ی سرورهای وب)
 
