@@ -30,7 +30,7 @@
   <link rel="preload" href="/SiteAssets/shastan/fonts/DanaFaNum-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/SiteAssets/shastan/fonts/DanaFaNum-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/SiteAssets/shastan/vendor/fontawesome/css/all.min.css">
-  <link rel="stylesheet" href="/SiteAssets/shastan/css/shastan.css?v=202609271142">
+  <link rel="stylesheet" href="/SiteAssets/shastan/css/shastan.css?v=202609271208">
   <script>window.SHASTAN_CONFIG = { mode: 'sp' };</script>
 </head>
 <body class="shn-body">
@@ -246,6 +246,6 @@
 
   </div>
   <asp:ContentPlaceHolder ID="PlaceHolderUtilityContent" runat="server" />
-  <script src="/SiteAssets/shastan/js/shastan.js?v=202609271142"></script>
+  <script src="/SiteAssets/shastan/js/shastan.js?v=202609271208"></script>
 </body>
 </SharePoint:SPHtmlTag>
