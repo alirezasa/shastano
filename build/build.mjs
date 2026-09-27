@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, readdirSync, st
 import { join, dirname, relative, extname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import * as esbuild from 'esbuild';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -61,8 +62,12 @@ function copyAssets() {
   cpSync(join(fa, 'webfonts'), join(ASSETS, 'vendor/fontawesome/webfonts'), { recursive: true });
 }
 
+const require = createRequire(import.meta.url);
+
+// اجرای Tailwind از طریق خود node (نه node_modules/.bin) تا روی Windows هم کار کند
 function buildCss() {
-  execFileSync(join(ROOT, 'node_modules/.bin/tailwindcss'), [
+  execFileSync(process.execPath, [
+    require.resolve('tailwindcss/lib/cli.js'),
     '-c', join(ROOT, 'tailwind.config.js'),
     '-i', join(SRC, 'styles/main.css'),
     '-o', join(ASSETS, 'css/shastan.css'),
@@ -94,6 +99,11 @@ function buildSharePointPackage() {
   cpSync(ASSETS, layoutsAssets, { recursive: true });
 }
 
+function checkOutput() {
+  const missing = ['assets/css/shastan.css', 'assets/js/shastan.js', 'index.html'].filter((f) => !existsSync(join(DIST, f)));
+  if (missing.length) throw new Error(`build output missing: ${missing.join(', ')}`);
+}
+
 async function buildAll() {
   const t = Date.now();
   rmSync(DIST, { recursive: true, force: true });
@@ -103,10 +113,16 @@ async function buildAll() {
   buildCss();
   await buildJs();
   buildSharePointPackage();
+  checkOutput();
   console.log(`✔ build finished in ${Date.now() - t}ms`);
 }
 
-await buildAll();
+try {
+  await buildAll();
+} catch (e) {
+  console.error('\n✖ build failed:', e.message);
+  if (!process.argv.includes('--watch')) process.exit(1);
+}
 
 if (process.argv.includes('--watch')) {
   let timer;
