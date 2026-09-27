@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سکوی نوآوری و فناوری شستان</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Dana', 'sans-serif'],
+                    },
+                    colors: {
+                        tappico: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            dark: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- نوار شبیه‌سازی سطح دسترسی کاربران (جهت تست سناریو) -->
+    <div class="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-2 space-x-reverse">
+           
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="switchUserRole('public')" id="role-btn-public" class="px-2.5 py-1 rounded transition bg-tappico-500 text-white font-medium">
+                <i class="fa-solid fa-globe ml-1"></i> کاربر عمومی
+            </button>
+            <button onclick="switchUserRole('subsidiary')" id="role-btn-subsidiary" class="px-2.5 py-1 rounded transition hover:bg-slate-800 text-slate-300">
+                <i class="fa-solid fa-building ml-1"></i> ورود به پنل شرکت ها
+            </button>
+            <button onclick="switchUserRole('holding')" id="role-btn-holding" class="px-2.5 py-1 rounded transition hover:bg-slate-800 text-slate-300">
+                <i class="fa-solid fa-shield-halved ml-1"></i> پنل مدیریت
+            </button>
+        </div>
+    </div>
+
+    <!-- هدر اصلی و منوی شرکتی -->
+    <header class="glass-header text-white sticky top-0 z-40 shadow-lg transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- برند و لوگو -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-12 h-12 bg-gradient-to-tr from-tappico-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-md shadow-tappico-500/30">
+                        <i class="fa-solid fa-lightbulb text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-tappico-100 bg-clip-text text-transparent">سکوی نوآوری و فناوری شستان</span>
+                        
+                    </div>
+                </div>
+
+                <!-- منوی اصلی (دسکتاپ) -->
+                <nav class="hidden lg:flex items-center gap-1 text-sm font-medium text-slate-200">
+                    <a href="javascript:void(0)" onclick="navigateTo('home')" class="nav-item px-3 py-2 rounded-lg hover:text-white hover:bg-slate-800/60 transition">صفحه اصلی</a>
+                    <a href="javascript:void(0)" onclick="navigateTo('companies')" class="nav-item px-3 py-2 rounded-lg hover:text-white hover:bg-slate-800/60 transition">معرفی شرکت‌ها</a>
+                    
+                    <a href="javascript:void(0)" onclick="navigateTo('contact')" class="nav-item px-3 py-2 rounded-lg hover:text-white hover:bg-slate-800/60 transition">تماس با ما</a>
+                </nav>
+
+                <!-- اکشن‌ها و ورود -->
+                <div class="flex items-center gap-3">
+                    <div id="user-status-badge" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="role-display-name">کاربر عمومی</span>
+                    </div>
+
+                    <!-- دکمه ویژه هلدینگ (فقط در حالت مدیریت هلدینگ دیده می‌شود) -->
+                    <button id="btn-holding-panel" onclick="navigateTo('holding-admin')" class="hidden bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs shadow-md transition items-center gap-1.5">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>کارتابل بررسی و تایید</span>
+                        <span class="bg-slate-950 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1">۳</span>
+                    </button>
+
+                    <!-- دکمه ویژه شرکت تابعه (ثبت فرم جدید) -->
+                    <button id="btn-subcompany-action" onclick="openNewRfpModal()" class="hidden bg-tappico-500 hover:bg-tappico-700 text-white font-medium px-4 py-2 rounded-lg text-xs shadow-md shadow-tappico-500/20 transition items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>ثبت نیاز فناورانه جدید</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- بدنه اصلی (بر اساس منوها سوئیچ می‌شود) -->
+    <main id="main-container" class="flex-grow">
+
+        <!-- ================= PAGE 1: HOME PAGE ================= -->
+        <section id="page-home" class="page-view space-y-12 pb-16">
+            
+            <!-- Hero Banner -->
+            <div class="hero-bg text-white py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800 relative overflow-hidden">
+                <div class="max-w-7xl mx-auto relative z-10">
+                    <div class="max-w-3xl space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tappico-500/20 border border-tappico-500/40 text-tappico-100 text-xs font-semibold">
+                            <i class="fa-solid fa-microchip"></i>
+                            <span>زیست‌بوم نوآوری و فناوری شستان</span>
+                        </div>
+                        <h1 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+                            بستر داده‌محور و یکپارچه تبادل فناوری و رفع چالش‌های صنعت
+                        </h1>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed font-light">
+                            شرکت سرمایه‌گذاری تجاری شستان با جمع‌آوری یکپارچه نیازهای فناورانه شرکت‌های زیرمجموعه و هم‌رسانی آن‌ها با توانمندی‌های شرکت‌های دانش‌بنیان، مسیر توسعه فناوری، تجاری‌سازی طرح‌ها و بومی‌سازی را هموار ساخته است.
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="navigateTo('rfps')" class="bg-tappico-500 hover:bg-tappico-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-tappico-500/30 transition flex items-center gap-2">
+                                <span>مشاهده نظام مسائل فناورانه</span>
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <button onclick="navigateTo('companies')" class="bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 px-6 py-3 rounded-xl font-medium text-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-building-user"></i>
+                                <span>معرفی شرکت‌های تابعه</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- آمار و ارقام کلیدی (آمار ۹۸ مسئله، ۲۸ شرکت و ...) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- کارت ۱ -->
+                    <div onclick="navigateTo('companies')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-blue-100 text-tappico-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-building text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۲۸</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">تعداد شرکت‌ها</div>
+                        <span class="text-[10px] text-tappico-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+
+                    <!-- کارت ۲ -->
+                    <div onclick="navigateTo('rfps')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-circle-question text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۹۸</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">مسائل فناورانه</div>
+                        <span class="text-[10px] text-amber-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+
+                    <!-- کارت ۳ -->
+                    <div onclick="navigateTo('products')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-award text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۳</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">محصولات دانش‌بنیان</div>
+                        <span class="text-[10px] text-emerald-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+
+                    <!-- کارت ۴ -->
+                    <div onclick="navigateTo('rd')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-flask text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۳۴</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">طرح‌های R&D</div>
+                        <span class="text-[10px] text-purple-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+
+                    <!-- کارت ۵ -->
+                    <div onclick="navigateTo('generic', 'قراردادهای رفع نیاز')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-cyan-100 text-cyan-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-file-contract text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۷۱</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">قراردادهای رفع نیاز</div>
+                        <span class="text-[10px] text-cyan-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+
+                    <!-- کارت ۶ -->
+                    <div onclick="navigateTo('generic', 'طرح‌های توسعه‌ای')" class="stat-card-gradient p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group text-center">
+                        <div class="w-10 h-10 mx-auto mb-3 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                            <i class="fa-solid fa-chart-line text-lg"></i>
+                        </div>
+                        <div class="text-2xl font-black text-slate-900">۱۴</div>
+                        <div class="text-xs text-slate-500 font-medium mt-1">طرح‌های توسعه‌ای</div>
+                        <span class="text-[10px] text-rose-700 font-bold mt-2 inline-block">مشاهده بیشتر &larr;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- حوزه‌های ۷ گانه بهبود و تحول -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <h2 class="text-2xl font-black text-slate-900">حوزه‌های ۷‌گانه تمرکز فناورانه شستان</h2>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-2">دسته‌بندی تخصصی مسائل و پروژه‌های نوآورانه در سطح شرکت‌های تابعه</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-sky-50 text-tappico-500 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۱. بهبود و تحول در فرآیند</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">بهینه‌سازی خطوط تولید، کاهش ضایعات و افزایش بازدهی عملیاتی در پتروشیمی‌ها.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۲. بومی‌سازی و ساخت داخل</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">تولید داخلی قطعات، کاتالیست‌ها و تجهیزات های‌تک تحریمی صنعت نفت.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۳. هوشمندسازی و تحول دیجیتال</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">به‌کارگیری IoT، هوش مصنوعی و سیستم‌های تصمیم‌یار در مدیریت مجتمع‌ها.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۴. محیط زیست و اقتصاد پایدار</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">کاهش کربن، بازیافت پساب‌های صنعتی و مدیریت پسماندهای پتروشیمی.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۵. زنجیره ارزش و توسعه محصول</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">تکمیل زنجیره پایین‌دستی، تولید محصولات با ارزش افزوده بالا.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">۶. مواد اولیه و مصرفی</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">تامین خودکفای مواد شیمیایی، افزودنی‌ها و خوراک مجتمع‌های تولیدی.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 transition col-span-1 md:col-span-2 lg:col-span-2">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-cyan-50 text-cyan-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-1">۷. مدیریت انرژی و یوتیلیتی</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed">کاهش مصرف انرژی، بازیابی حرارت تلف‌شده و ارتقای بازدهی نیروگاهی مجتمع‌های تاپیکو.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لیست نمونه‌ای از آخرین مسائل فناورانه -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">آخرین فراخوان‌ها و مسائل فناورانه</h2>
+                        <p class="text-slate-500 text-xs mt-1">نیازهای فوری و اولویت‌دار شرکت‌های تابعه برای دریافت طرح پیشنهاد (RFP)</p>
+                    </div>
+                    <button onclick="navigateTo('rfps')" class="text-tappico-700 hover:text-tappico-900 text-xs font-bold flex items-center gap-1">
+                        <span>مشاهده همه (۹۸)</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="home-rfp-list">
+                    <!-- آیتم‌ها توسط جاوااسکریپت رندر می‌شوند -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 2: COMPANY DIRECTORY ================= -->
+        <section id="page-companies" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="border-b border-slate-200 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">معرفی شرکت‌های تابعه شستان</h1>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-1">دایرکتوری ۲۸ شرکت تولیدی و خدمات مهندسی در حوزه نفت، گاز، پتروشیمی و صنایع وابسته</p>
+                </div>
+                <!-- فیلتر و جستجو -->
+                <div class="flex items-center gap-2">
+                    <input type="text" id="company-search" oninput="filterCompanies()" placeholder="جستجوی نام شرکت..." class="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs w-64 focus:outline-none focus:ring-2 focus:ring-tappico-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="companies-grid">
+                <!-- رندر شرکت‌ها با JS -->
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 3: DEDICATED COMPANY PROFILE ================= -->
+        <section id="page-company-detail" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <!-- نوار بازگشت -->
+            <button onclick="navigateTo('companies')" class="text-slate-500 hover:text-slate-800 text-xs font-medium flex items-center gap-1">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>بازگشت به دایرکتوری شرکت‌ها</span>
+            </button>
+
+            <!-- هدر شرکت -->
+            <div id="company-detail-header" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <!-- جزییات شرکت با JS پر می‌شود -->
+            </div>
+
+            <!-- تب‌های اطلاعاتی شرکت -->
+            <div class="border-b border-slate-200 flex gap-6 text-sm font-medium">
+                <button onclick="switchCompanyTab('tab-rfp')" id="btn-tab-rfp" class="pb-3 active-tab">نظام مسائل و چالش‌ها (RFP)</button>
+                <button onclick="switchCompanyTab('tab-rd')" id="btn-tab-rd" class="pb-3 text-slate-500 hover:text-slate-800">طرح‌های R&D و پروژه‌ها</button>
+                <button onclick="switchCompanyTab('tab-info')" id="btn-tab-info" class="pb-3 text-slate-500 hover:text-slate-800">اطلاعات تماس و نمایندگان</button>
+            </div>
+
+            <!-- محتوای تب مسائل -->
+            <div id="company-tab-rfp" class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-base">لیست مسائل ثبت شده این شرکت</h3>
+                    <button onclick="openNewRfpModal()" class="btn-company-only bg-tappico-500 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> ثبت مسئله جدید برای این شرکت
+                    </button>
+                </div>
+                <div id="company-rfp-list" class="space-y-3">
+                    <!-- با JS پر می‌شود -->
+                </div>
+            </div>
+
+            <!-- محتوای تب R&D -->
+            <div id="company-tab-rd" class="hidden space-y-4">
+                <div id="company-rd-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- با JS پر می‌شود -->
+                </div>
+            </div>
+
+            <!-- محتوای تب اطلاعات تماس -->
+            <div id="company-tab-info" class="hidden bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                <h4 class="font-bold text-slate-800 text-sm">نماینده فناوری و نوآوری شرکت:</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
+                    <div><span class="font-semibold text-slate-800">نام و نام خانوادگی:</span> مهندس رضایی</div>
+                    <div><span class="font-semibold text-slate-800">سمت:</span> مدیر تحقیق و توسعه (R&D)</div>
+                    <div><span class="font-semibold text-slate-800">ایمیل مستقیم:</span> rd@fanavaran.ir</div>
+                    <div><span class="font-semibold text-slate-800">تلفن داخلی:</span> ۰۲۱-۴۲۵۷۵۰۰۰ داخلی ۳۰۴</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 4: SYSTEM OF ISSUES (RFP CATALOG) ================= -->
+        <section id="page-rfps" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="border-b border-slate-200 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900">نظام مسائل فناورانه (RFP)</h1>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-1">بانک اطلاعاتی جامع ۹۸ مسئله و چالش احصا شده از شرکت‌های زیرمجموعه شستان</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="rfp-domain-filter" onchange="filterRfps()" class="bg-white border border-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none">
+                        <option value="all">همه حوزه‌های ۷گانه</option>
+                        <option value="فرآیند">بهبود و تحول در فرآیند</option>
+                        <option value="بومی‌سازی">بومی‌سازی و ساخت داخل</option>
+                        <option value="هوشمندسازی">هوشمندسازی و تحول دیجیتال</option>
+                        <option value="محیط زیست">محیط زیست و اقتصاد پایدار</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- جدول / کارت‌های RFP -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="rfps-catalog-grid">
+                <!-- رندر با JS -->
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 5: HOLDING ADMIN WORKSPACE ================= -->
+        <section id="page-holding-admin" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="bg-gradient-to-r from-slate-900 to-tappico-900 text-white p-6 rounded-2xl shadow-lg flex justify-between items-center">
+                <div>
+                    <div class="inline-block bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded mb-2">پنل اختصاصی هلدینگ شستان </div>
+                    <h1 class="text-xl font-black">کارتابل مدیریت، بررسی و تایید اطلاعات</h1>
+                    <p class="text-xs text-slate-300 mt-1">فرم‌ها و مسائل فناورانه ارسالی توسط شرکت‌های تابعه را بررسی، رد، تایید یا منتشر نمایید.</p>
+                </div>
+                <div class="text-left hidden sm:block">
+                    <span class="text-xs text-slate-400 block">تعداد فرم‌های در انتظار بررسی:</span>
+                    <span class="text-2xl font-black text-amber-400">۳ مورد</span>
+                </div>
+            </div>
+
+            <!-- جدول کارتابل بررسی -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="p-4 border-b border-slate-200 font-bold text-sm text-slate-800 flex justify-between items-center">
+                    <span>لیست درخواست‌های جدید نیازمند تعیین تکلیف</span>
+                    <span class="text-xs text-slate-500 font-normal">بروزرسانی: هم‌اکنون</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">کد مسئله</th>
+                                <th class="p-3">عنوان مسئله / درخواست</th>
+                                <th class="p-3">شرکت متقاضی</th>
+                                <th class="p-3">حوزه تخصصی</th>
+                                <th class="p-3">تاریخ ارسال</th>
+                                <th class="p-3">وضعیت فعلی</th>
+                                <th class="p-3 text-center">عملیات مدیریت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holding-approval-table" class="divide-y divide-slate-100">
+                            <!-- رندر فرم‌های ارسالی با JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 6: CONTACT US ================= -->
+        <section id="page-contact" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="border-b border-slate-200 pb-5">
+                <h1 class="text-2xl font-black text-slate-900">تماس با ما و ارتباط با مرکز نوآوری</h1>
+                <p class="text-slate-500 text-xs sm:text-sm mt-1">پل‌های ارتباطی با شرکت سرمایه‌گذاری تجاری شستان</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- اطلاعات تماس -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-tappico-50 text-tappico-700 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-900">نشانی مرکز اصلی:</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mt-1">
+                                تهران، سهروردی، خیابان خرمشهر، پلاک 132 شرکت سرمایه‌گذاری تجاری شستان
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-900">تلفن‌های تماس:</h4>
+                            <p class="text-xs text-slate-600 mt-1">تلفنخانه مرکزی: 021-85390000</p>
+                            <p class="text-xs text-slate-600 mt-1">روابط عمومی: 021-42575101 | 021-42575103</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-900">پست الکترونیک:</h4>
+                            <p class="text-xs text-slate-600 mt-1">info@shastan.ir</p>
+                        </div>
+                    </div>
+
+                    <!-- نقشه جایگزین mock -->
+                    <div class="bg-slate-100 rounded-xl h-48 flex items-center justify-center border border-slate-200 text-slate-400 text-xs">
+                        <i class="fa-solid fa-map-location-dot text-2xl ml-2"></i>
+                        <span>موقعیت مکانی شستان روی نقشه</span>
+                    </div>
+                </div>
+
+                <!-- فرم پیام سولات -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-slate-900 text-sm">ارسال پیام یا استعلام مستقیم</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">نام و نام خانوادگی / نام شرکت</label>
+                            <input type="text" placeholder="مثال: شرکت فناور نوآوران" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-tappico-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">شماره تماس جهت پیگیری</label>
+                            <input type="text" placeholder="0912..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-tappico-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">متن پیام یا استعلام</label>
+                            <textarea rows="4" placeholder="توضیحات خود را بنویسید..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-tappico-500"></textarea>
+                        </div>
+                        <button onclick="showToast('پیام شما با موفقیت ثبت شد و به روابط عمومی ارجاع گردید.')" class="w-full bg-tappico-500 text-white font-bold text-xs py-3 rounded-lg shadow hover:bg-tappico-700 transition">
+                            ارسال پیام
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= PAGE 7: GENERIC TEMPLATE FOR OTHER MENU ITEMS ================= -->
+        <section id="page-generic" class="page-view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="border-b border-slate-200 pb-5">
+                <h1 id="generic-page-title" class="text-2xl font-black text-slate-900">عنوان بخش</h1>
+                <p id="generic-page-desc" class="text-slate-500 text-xs sm:text-sm mt-1">توضیحات مربوط به این بخش از سامانه شستان</p>
+            </div>
+
+            <div id="generic-page-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- محتوا به شکل پویا برای منوهای تفاهم‌نامه‌ها، اختراعات، فراخوان‌ها و ... نمایش داده می‌شود -->
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- فوتر رسمی تاپیکو -->
+    <footer class="bg-slate-900 text-slate-400 text-xs mt-auto border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- ستون ۱: درباره فن‌تاپ -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-white font-bold text-base">
+                        <i class="fa-solid fa-lightbulb text-tappico-500"></i>
+                        <span>سامانه نوآوری و فناوری شستان</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-400 font-light">
+                        بستر جامع اطلاعاتی و داده‌محور هلدینگ شستان جهت پایش، تحلیل و هم‌رسانی نیازهای فناورانه شرکت‌های زیرمجموعه با شرکت‌های دانش‌بنیان.
+                    </p>
+                </div>
+
+                <!-- ستون ۲: لینک‌های سریع -->
+                <div class="space-y-2">
+                    <h4 class="text-white font-bold text-sm mb-3">لینک‌های مفید</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="javascript:void(0)" onclick="navigateTo('home')" class="hover:text-white transition">صفحه اصلی</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('companies')" class="hover:text-white transition">معرفی شرکت‌ها</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('rfps')" class="hover:text-white transition">نظام مسائل فناورانه</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('calls')" class="hover:text-white transition">فراخوان‌ها</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('generic', 'تفاهم‌نامه‌ها')" class="hover:text-white transition">تفاهم‌نامه‌ها</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('products')" class="hover:text-white transition">محصولات و خدمات دانش‌بنیان</a></li>
+                    </ul>
+                </div>
+
+                <!-- ستون ۳: لینک‌های تکمیلی -->
+                <div class="space-y-2">
+                    <h4 class="text-white font-bold text-sm mb-3">بخش‌های تخصصی</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="javascript:void(0)" onclick="navigateTo('generic', 'اختراعات')" class="hover:text-white transition">اختراعات ثبت شده</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('rd')" class="hover:text-white transition">طرح‌های تحقیق و توسعه (R&D)</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('generic', 'انتشارات و گزارشات')" class="hover:text-white transition">انتشارات و گزارشات</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('generic', 'نمایشگاه‌ها و رویدادها')" class="hover:text-white transition">نمایشگاه‌ها و رویدادها</a></li>
+                        <li><a href="javascript:void(0)" onclick="navigateTo('contact')" class="hover:text-white transition">تماس با ما</a></li>
+                    </ul>
+                </div>
+
+                <!-- ستون ۴: اطلاعات تماس هلدینگ -->
+                <div class="space-y-2">
+                    <h4 class="text-white font-bold text-sm mb-3">اطلاعات هلدینگ تاپیکو</h4>
+                    <p class="leading-relaxed"><strong class="text-slate-300">نشانی:</strong> تهران، سهروردی، خیابان خرمشهر، پلاک 132 شرکت سرمایه‌گذاری تجاری شستان</p>
+                    <p><strong class="text-slate-300">تلفن:</strong> 021-85390000</p>
+                    <p><strong class="text-slate-300">روابط عمومی:</strong> 021-42575101</p>
+                    <p><strong class="text-slate-300">ایمیل:</strong> info@shastan.ir</p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 mt-10 pt-6 text-center text-slate-500 text-[11px]">
+                کلیه حقوق این سایت محفوظ و متعلق به شرکت سرمایه‌گذاری تجاری شستان است.
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- مودال ثبت فرم جدید مسئله فناورانه (مخصوص شرکت‌های تابعه) -->
+    <div id="modal-new-rfp" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-4">
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-circle-plus text-tappico-500"></i>
+                    <span>ثبت فرم نیاز و مسئله فناورانه جدید</span>
+                </h3>
+                <button onclick="closeNewRfpModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="submitNewRfpForm(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">شرکت متقاضی / تابعه:</label>
+                    <input type="text" id="form-company-name"  value="پتروشیمی فن‌آوران" class="w-full bg-slate-100 border border-slate-200 rounded-lg p-2.5 font-bold text-slate-800">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">عنوان مسئله فناورانه:</label>
+                    <input type="text" required placeholder="مثال: بومی‌سازی کاتالیست سنتز متانول" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-tappico-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">حوزه اصلی (از حوزه‌های ۷گانه):</label>
+                        <select class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-tappico-500 outline-none">
+                            <option>بهبود و تحول در فرآیند</option>
+                            <option>بومی‌سازی و ساخت داخل</option>
+                            <option>هوشمندسازی و تحول دیجیتال</option>
+                            <option>محیط زیست و اقتصاد پایدار</option>
+                            <option>زنجیره ارزش و توسعه محصول</option>
+                            <option>مواد اولیه و مصرفی</option>
+                            <option>مدیریت انرژی و یوتیلیتی</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">اولویت پروژه:</label>
+                        <select class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-tappico-500 outline-none">
+                            <option>خیلی بالا / فوری</option>
+                            <option>متوسط</option>
+                            <option>عادی</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">شرح کامل چالش و دستاورد مورد انتظار:</label>
+                    <textarea rows="4" required placeholder="توضیحات فنی چالش..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 focus:ring-2 focus:ring-tappico-500 outline-none"></textarea>
+                </div>
+
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-800">
+                    <i class="fa-solid fa-circle-info ml-1"></i>
+                    پس از ارسال فرم، وضعیت آن روی <strong>«در انتظار بررسی هلدینگ تاپیکو»</strong> قرار گرفته و پس از تایید مدیران تاپیکو در سامانه عمومی منتشر خواهد شد.
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeNewRfpModal()" class="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 font-bold">انصراف</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-tappico-500 hover:bg-tappico-700 text-white font-bold shadow">ارسال جهت بررسی هلدینگ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- پیام شناور (Toast Notification) -->
+    <div id="toast-msg" class="fixed bottom-5 left-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs z-50 hidden flex items-center gap-2 border border-slate-700">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-text">عملیات با موفقیت انجام شد.</span>
+    </div>
+
+
+    <script>
+        /* داده‌های نمونه مربوط به شرکت‌های تاپیکو و مسائل */
+        const mockCompanies = [
+            { id: 1, name: "پتروشیمی فن‌آوران", category: "پتروشیمی", logo: "fa-flask", rfpsCount: 12, rdCount: 4, desc: "تولیدکننده متانول، اسید استیک و CO در منطقه ویژه اقتصادی پتروشیمی ماهشهر." },
+            { id: 2, name: "پتروشیمی خراسان", category: "پتروشیمی", logo: "fa-industry", rfpsCount: 8, rdCount: 3, desc: "بزرگترین مجتمع تولیدی کودهای شیمیایی و اوره و ملامین در شمال شرق کشور." },
+            { id: 3, name: "نفت پاسارگاد", category: "نفت و قیر", logo: "fa-oil-well", rfpsCount: 15, rdCount: 6, desc: "بزرگترین تولیدکننده قیر در خاورمیانه با ۶ کارخانه تولیدی." },
+            { id: 4, name: "پتروشیمی آبادان", category: "پتروشیمی", logo: "fa-atom", rfpsCount: 9, rdCount: 2, desc: "قدیمی‌ترین مجتمع پتروشیمی ایران، تولیدکننده پی‌وی‌سی (PVC) و سود پرک." },
+            { id: 5, name: "نفت ایرانول", category: "روانکارها", logo: "fa-droplet", rfpsCount: 11, rdCount: 5, desc: "تولیدکننده انواع روغن‌های موتور و روانکارهای صنعتی در پالایشگاه‌های تهران و آبادان." },
+            { id: 6, name: "سرمایه‌گذاری صنایع پتروشیمی (PIIC)", category: "سرمایه‌گذاری", logo: "fa-chart-pie", rfpsCount: 7, rdCount: 3, desc: "هلدینگ تخصصی مدیریت شرکت‌های صنعتی و تولیدی زنجیره پتروشیمی." }
+        ];
+
+        const mockRfps = [
+            { id: "RFP-101", title: "بومی‌سازی کاتالیست سنتز متانول با دانش فنی داخلی", company: "پتروشیمی فن‌آوران", domain: "بومی‌سازی", status: "فراخوان فعال", priority: "خیلی بالا", date: "۱۴۰۲/۱۱/۱۵" },
+            { id: "RFP-102", title: "بهینه‌سازی مصرف انرژی در کوره‌های واحدهای الفین", company: "پتروشیمی خراسان", domain: "مدیریت انرژی", status: "تایید شده", priority: "متوسط", date: "۱۴۰۲/۱۱/۲۰" },
+            { id: "RFP-103", title: "هوشمندسازی پایپینگ و پایش خوردگی با سنسورهای IoT", company: "نفت پاسارگاد", domain: "هوشمندسازی", status: "فراخوان فعال", priority: "بالا", date: "۱۴۰۲/۱۲/۰۱" },
+            { id: "RFP-104", title: "بازیابی پساب صنعتی و صفر کردن تخلیه زه‌آب (ZLD)", company: "پتروشیمی آبادان", domain: "محیط زیست", status: "تایید شده", priority: "خیلی بالا", date: "۱۴۰۲/۱۲/۰۵" }
+        ];
+
+        let mockSubmissions = [
+            { id: "SUB-801", title: "بازیابی گازهای مشعل (Flare) مجتمع", company: "پتروشیمی فن‌آوران", domain: "محیط زیست", date: "۱۴۰۲/۱۲/۱۰", status: "در انتظار بررسی هلدینگ" },
+            { id: "SUB-802", title: "ساخت داخل مکانیکال سیل‌های های‌تک", company: "نفت ایرانول", domain: "بومی‌سازی", date: "۱۴۰۲/۱۲/۱۱", status: "در انتظار بررسی هلدینگ" },
+            { id: "SUB-803", title: "اتوماسیون انبارها با سیستم RFID", company: "صنایع پتروشیمی", domain: "هوشمندسازی", date: "۱۴۰۲/۱۲/۱۲", status: "در انتظار بررسی هلدینگ" }
+        ];
+
+        let currentUserRole = 'public'; // public | subsidiary | holding
+        let currentSelectedCompany = null;
+
+        // مقداردهی اولیه پس از بارگذاری صفحه
+        window.onload = function() {
+            renderHomeRfps();
+            renderCompaniesGrid();
+            renderRfpsCatalog();
+            renderHoldingApprovalTable();
+        };
+
+        function navigateTo(pageId, extraParam = null) {
+            // پنهان کردن تمام صفحات
+            document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+
+            if (pageId === 'home') {
+                document.getElementById('page-home').classList.remove('hidden');
+            } else if (pageId === 'companies') {
+                document.getElementById('page-companies').classList.remove('hidden');
+            } else if (pageId === 'company-detail') {
+                document.getElementById('page-company-detail').classList.remove('hidden');
+            } else if (pageId === 'rfps') {
+                document.getElementById('page-rfps').classList.remove('hidden');
+            } else if (pageId === 'holding-admin') {
+                document.getElementById('page-holding-admin').classList.remove('hidden');
+            } else if (pageId === 'contact') {
+                document.getElementById('page-contact').classList.remove('hidden');
+            } else if (pageId === 'generic') {
+                document.getElementById('page-generic').classList.remove('hidden');
+                document.getElementById('generic-page-title').innerText = extraParam || 'اطلاعات بخش';
+                renderGenericContent(extraParam);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchUserRole(role) {
+            currentUserRole = role;
+            
+            // به‌روزرسانی ظاهر دکمه‌های سوئیچ نقش
+            document.getElementById('role-btn-public').className = role === 'public' ? 'px-2.5 py-1 rounded transition bg-tappico-500 text-white font-medium' : 'px-2.5 py-1 rounded transition hover:bg-slate-800 text-slate-300';
+            document.getElementById('role-btn-subsidiary').className = role === 'subsidiary' ? 'px-2.5 py-1 rounded transition bg-tappico-500 text-white font-medium' : 'px-2.5 py-1 rounded transition hover:bg-slate-800 text-slate-300';
+            document.getElementById('role-btn-holding').className = role === 'holding' ? 'px-2.5 py-1 rounded transition bg-tappico-500 text-white font-medium' : 'px-2.5 py-1 rounded transition hover:bg-slate-800 text-slate-300';
+
+            // به‌روزرسانی متن نشانگر نقش
+            const badgeText = document.getElementById('role-display-name');
+            const btnHolding = document.getElementById('btn-holding-panel');
+            const btnCompanyAction = document.getElementById('btn-subcompany-action');
+
+            if (role === 'public') {
+                badgeText.innerText = 'کاربر عمومی';
+                btnHolding.classList.add('hidden');
+                btnCompanyAction.classList.add('hidden');
+            } else if (role === 'subsidiary') {
+                badgeText.innerText = 'شرکت تابعه';
+                btnHolding.classList.add('hidden');
+                btnCompanyAction.classList.remove('hidden');
+                btnCompanyAction.classList.add('flex');
+            } else if (role === 'holding') {
+                badgeText.innerText = 'مدیر هلدینگ ';
+                btnHolding.classList.remove('hidden');
+                btnHolding.classList.add('flex');
+                btnCompanyAction.classList.add('hidden');
+            }
+
+            showToast(`نقش کاربری به «${badgeText.innerText}» تغییر یافت.`);
+        }
+
+        function renderHomeRfps() {
+            const container = document.getElementById('home-rfp-list');
+            container.innerHTML = mockRfps.slice(0, 3).map(rfp => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">${rfp.company}</span>
+                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">${rfp.status}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-sm leading-snug">${rfp.title}</h4>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-100 text-xs">
+                        <span class="text-slate-400">حوزه: ${rfp.domain}</span>
+                        <button onclick="navigateTo('rfps')" class="text-tappico-700 font-bold hover:underline">ارسال پیشنهاد &larr;</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCompaniesGrid() {
+            const grid = document.getElementById('companies-grid');
+            grid.innerHTML = mockCompanies.map(c => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-tappico-500 hover:shadow-md transition space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-tappico-50 text-tappico-700 rounded-xl flex items-center justify-center text-2xl">
+                            <i class="fa-solid ${c.logo}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 text-base">${c.name}</h3>
+                            <span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">${c.category}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${c.desc}</p>
+                    <div class="grid grid-cols-2 gap-2 text-center pt-2 border-t border-slate-100 text-xs">
+                        <div class="bg-slate-50 p-2 rounded-lg">
+                            <span class="block font-bold text-slate-900">${c.rfpsCount}</span>
+                            <span class="text-[10px] text-slate-400">مسئله ثبت شده</span>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded-lg">
+                            <span class="block font-bold text-slate-900">${c.rdCount}</span>
+                            <span class="text-[10px] text-slate-400">پروژه R&D</span>
+                        </div>
+                    </div>
+                    <button onclick="openCompanyDetail(${c.id})" class="w-full bg-slate-900 hover:bg-tappico-700 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                        ورود به صفحه اختصاصی شرکت
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openCompanyDetail(companyId) {
+            const company = mockCompanies.find(c => c.id === companyId);
+            currentSelectedCompany = company;
+
+            const header = document.getElementById('company-detail-header');
+            header.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-tappico-500 text-white rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-tappico-500/30">
+                        <i class="fa-solid ${company.logo}"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900">${company.name}</h2>
+                        <p class="text-xs text-slate-500 mt-1">${company.desc}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-center px-4 py-2 bg-slate-50 rounded-xl border border-slate-200">
+                        <span class="text-xs text-slate-400 block">مسائل فناورانه</span>
+                        <span class="text-lg font-black text-tappico-700">${company.rfpsCount}</span>
+                    </div>
+                </div>
+            `;
+
+            // لیست مسائل شرکت
+            const rfpList = document.getElementById('company-rfp-list');
+            rfpList.innerHTML = mockRfps.map(r => `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-slate-800 text-sm block mb-1">${r.title}</span>
+                        <span class="text-slate-400">کد: ${r.id} | حوزه: ${r.domain}</span>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold">${r.status}</span>
+                </div>
+            `).join('');
+
+            navigateTo('company-detail');
+        }
+
+        function switchCompanyTab(tabId) {
+            document.getElementById('company-tab-rfp').classList.add('hidden');
+            document.getElementById('company-tab-rd').classList.add('hidden');
+            document.getElementById('company-tab-info').classList.add('hidden');
+
+            document.getElementById('btn-tab-rfp').className = 'pb-3 text-slate-500 hover:text-slate-800';
+            document.getElementById('btn-tab-rd').className = 'pb-3 text-slate-500 hover:text-slate-800';
+            document.getElementById('btn-tab-info').className = 'pb-3 text-slate-500 hover:text-slate-800';
+
+            if (tabId === 'tab-rfp') {
+                document.getElementById('company-tab-rfp').classList.remove('hidden');
+                document.getElementById('btn-tab-rfp').className = 'pb-3 active-tab';
+            } else if (tabId === 'tab-rd') {
+                document.getElementById('company-tab-rd').classList.remove('hidden');
+                document.getElementById('btn-tab-rd').className = 'pb-3 active-tab';
+            } else if (tabId === 'tab-info') {
+                document.getElementById('company-tab-info').classList.remove('hidden');
+                document.getElementById('btn-tab-info').className = 'pb-3 active-tab';
+            }
+        }
+
+        function renderRfpsCatalog() {
+            const grid = document.getElementById('rfps-catalog-grid');
+            grid.innerHTML = mockRfps.map(r => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-tappico-50 text-tappico-700 px-2 py-0.5 rounded font-bold">${r.company}</span>
+                        <span class="text-slate-400">${r.date}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm leading-snug">${r.title}</h3>
+                    <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">حوزه: ${r.domain}</span>
+                        <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded">اولویت: ${r.priority}</span>
+                    </div>
+                    <button onclick="showToast('جزئیات کامل RFP به صورت سند PDF آماده دریافت است.')" class="w-full bg-slate-100 hover:bg-tappico-500 hover:text-white font-bold text-xs py-2 rounded-lg transition text-slate-700">
+                        مشاهده جزئیات و ارسال پیشنهاد
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderHoldingApprovalTable() {
+            const tbody = document.getElementById('holding-approval-table');
+            if (mockSubmissions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">هیچ درخواستی در کارتابل وجود ندارد.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = mockSubmissions.map((sub, index) => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-bold text-slate-700">${sub.id}</td>
+                    <td class="p-3 font-bold text-slate-900">${sub.title}</td>
+                    <td class="p-3">${sub.company}</td>
+                    <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded">${sub.domain}</span></td>
+                    <td class="p-3 text-slate-400">${sub.date}</td>
+                    <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold text-[10px]">${sub.status}</span></td>
+                    <td class="p-3 text-center space-x-1 space-x-reverse">
+                        <button onclick="approveSubmission(${index})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1 rounded text-[11px] font-bold shadow">
+                            <i class="fa-solid fa-check ml-1"></i>تایید و انتشار
+                        </button>
+                        <button onclick="rejectSubmission(${index})" class="bg-rose-500 hover:bg-rose-600 text-white px-2.5 py-1 rounded text-[11px] font-bold shadow">
+                            <i class="fa-solid fa-xmark ml-1"></i>رد درخواست
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function approveSubmission(index) {
+            const sub = mockSubmissions[index];
+            showToast(`درخواست «${sub.title}» تایید و در سامانه فن‌تاپ منتشر گردید.`);
+            mockSubmissions.splice(index, 1);
+            renderHoldingApprovalTable();
+        }
+
+        function rejectSubmission(index) {
+            const sub = mockSubmissions[index];
+            showToast(`درخواست «${sub.title}» جهت اصلاح به شرکت ${sub.company} بازگردانده شد.`);
+            mockSubmissions.splice(index, 1);
+            renderHoldingApprovalTable();
+        }
+
+        function renderGenericContent(title) {
+            const container = document.getElementById('generic-page-content');
+            container.innerHTML = `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 bg-tappico-50 text-tappico-700 rounded-xl flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">لیست اسناد و گزاره‌های ${title}</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        این بخش به عنوان نمونه برای آرشیو ${title} پیاده‌سازی شده است و در نسخه متصل به لیست‌های شیرپوینت 2019 داده‌های واقعی را خوانش می‌کند.
+                    </p>
+                </div>
+            `;
+        }
+
+        function openNewRfpModal() {
+            document.getElementById('modal-new-rfp').classList.remove('hidden');
+        }
+
+        function closeNewRfpModal() {
+            document.getElementById('modal-new-rfp').classList.add('hidden');
+        }
+
+        function submitNewRfpForm(e) {
+            e.preventDefault();
+            closeNewRfpModal();
+            showToast("فرم شما با موفقیت ثبت شد و در کارتابل هلدینگ تاپیکو قرار گرفت.");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        function filterCompanies() {
+            const query = document.getElementById('company-search').value.toLowerCase();
+            const filtered = mockCompanies.filter(c => c.name.toLowerCase().includes(query));
+            const grid = document.getElementById('companies-grid');
+            grid.innerHTML = filtered.map(c => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-black text-slate-900 text-base">${c.name}</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">${c.desc}</p>
+                    <button onclick="openCompanyDetail(${c.id})" class="w-full bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl">مشاهده شرکت</button>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

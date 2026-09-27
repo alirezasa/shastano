@@ -1,0 +1,45 @@
+  @font-face {
+          font-family: 'Dana';
+          src: url('../fonts/DanaFaNum-Bold.woff2') format('woff2'),
+               url('../fonts/DanaFaNum-Bold.woff') format('woff');
+          font-weight: bold;
+          font-display: swap;
+        }
+
+        :root {
+          --green: #008000;
+          --red: #c22c2c;
+          --ink: #1f2933;
+          --muted: #6b7280;
+          --bg: #f4f6f8;
+          --card: #fff;
+          --line: #e5e7eb;
+          --radius: 14px;
+          --shadow: 0 6px 20px rgba(0,0,0,.08);
+        }
+
+        body { 
+            font-family: 'Dana', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--ink);
+        }
+        .glass-header { background: #008000; backdrop-filter: blur(10px); }
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(212, 4, 4, 0.582) 0%, rgba(12, 74, 110, 0.85) 100%), 
+                        url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80') center/cover no-repeat;
+        }
+        .stat-card-gradient { background: var(--card); }
+        .active-tab { border-bottom: 3px solid #c22c2c; color: #c22c2c; font-weight: 700; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--radius); }
+        
+        .border-slate-200, .border-slate-300, .border-slate-100 { border-color: var(--line) !important; }
+        .text-slate-900, .text-slate-800, .text-slate-700 { color: var(--ink) !important; }
+        .text-slate-500, .text-slate-400, .text-slate-600 { color: var(--muted) !important; }
+        .bg-white, .bg-slate-50 { background-color: var(--card) !important; }
+        .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl { box-shadow: var(--shadow) !important; }
+        .rounded-xl, .rounded-2xl, .rounded-lg { border-radius: var(--radius) !important; }
+        .bg-emerald-500, .bg-emerald-400 { background-color: var(--green) !important; }
+        .text-emerald-600, .text-emerald-700 { color: var(--green) !important; }
+        .bg-rose-500 { background-color: var(--red) !important; }
+        .text-rose-600, .text-rose-700 { color: var(--red) !important; }
