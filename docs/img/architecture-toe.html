@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Dana;src:url(../../src/assets/fonts/DanaFaNum-Regular.woff2) format('woff2');font-weight:400}
+@font-face{font-family:Dana;src:url(../../src/assets/fonts/DanaFaNum-Bold.woff2) format('woff2');font-weight:700}
+*{box-sizing:border-box;margin:0}
+body{background:#fff;font-family:Dana,Tahoma,sans-serif;color:#0f172a}
+#c{position:relative;width:1500px;height:1000px;background:#fff}
+.b{position:absolute;border-radius:10px;padding:8px 10px;text-align:center;font-size:13px;line-height:1.55;display:flex;flex-direction:column;justify-content:center}
+.b b{font-size:14.5px;display:block}
+.b small{font-size:12px;color:#334155;display:block}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.zone{position:absolute;border:2px dashed;border-radius:14px}
+.zt{position:absolute;font-weight:700;font-size:14px;padding:2px 10px;background:#fff;border-radius:6px}
+.user{background:#eff6ff;border:1.5px solid #3b82f6}
+.waf{background:#fff7ed;border:1.5px solid #f97316}
+.sp{background:#f0fdf4;border:1.5px solid #16a34a}
+.cust{background:#fef2f2;border:1.5px solid #c22c2c}
+.api{background:#ecfeff;border:1.5px solid #0891b2}
+.data{background:#f8fafc;border:1.5px solid #64748b}
+.ext{background:#faf5ff;border:1.5px solid #7c3aed}
+.def{background:#f1f5f9;border:1.5px solid #475569}
+svg{position:absolute;inset:0}
+.lbl{font-family:Dana,Tahoma;font-size:12px;fill:#0f172a;font-weight:700}
+.lg{position:absolute;font-size:12.5px;line-height:1.9}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:middle;margin-left:6px}
+h1{position:absolute;top:14px;right:0;left:0;text-align:center;font-size:21px}
+h2{position:absolute;top:46px;right:0;left:0;text-align:center;font-size:13px;font-weight:400;color:#475569}
+</style></head><body><div id="c">
+<h1>شمای معماری هدف ارزیابی — سکوی نوآوری و فناوری شستان</h1>
+<h2>SharePoint Server 2019 (On-Premises) · وب‌اپلیکیشن با دسترسی عمومی و احراز هویت FBA/LDAP روی Active Directory</h2>
+
+<!-- zones -->
+<div class="zone" style="right:20px;top:90px;width:230px;height:520px;border-color:#3b82f6"></div>
+<div class="zt" style="right:40px;top:78px;color:#1d4ed8">اینترنت — <span class="ltr">HTTPS : 443</span></div>
+<div class="zone" style="right:275px;top:90px;width:190px;height:520px;border-color:#f97316"></div>
+<div class="zt" style="right:300px;top:78px;color:#c2410c">DMZ</div>
+<div class="zone" style="right:490px;top:90px;width:990px;height:890px;border-color:#16a34a"></div>
+<div class="zt" style="right:520px;top:78px;color:#15803d">شبکه‌ی داخلی هلدینگ (LAN)</div>
+
+<!-- users -->
+<div class="b user" style="right:35px;top:120px;width:200px;height:110px"><b>کاربر عمومی (ناشناس)</b><small>مرور محتوای منتشرشده<br>ارسال پیشنهاد برای مسئله و پیام تماس</small></div>
+<div class="b user" style="right:35px;top:285px;width:200px;height:110px"><b>کارشناس شرکت تابعه</b><small>ورود FBA<br>ثبت/ویرایش اطلاعات شرکت خود</small></div>
+<div class="b user" style="right:35px;top:450px;width:200px;height:110px"><b>کارشناس / مدیر هلدینگ</b><small>ورود FBA<br>کارتابل تأیید، مدیریت اطلاعات پایه</small></div>
+<div class="lg" style="right:35px;top:575px;width:200px;text-align:center;color:#475569">مرورگر وب (دسکتاپ / موبایل)</div>
+
+<!-- WAF -->
+<div class="b waf" style="right:290px;top:270px;width:160px;height:150px"><b>WAF / Reverse Proxy</b><small>پایان TLS یا عبور TLS<br>محدودیت نرخ ورود و فرم‌ها<br>فیلتر درخواست‌ها</small></div>
+
+<!-- SharePoint farm -->
+<div class="zone" style="right:510px;top:115px;width:620px;height:850px;border-color:#16a34a;border-style:solid;background:#fcfffd"></div>
+<div class="zt" style="right:530px;top:103px;color:#15803d">فارم SharePoint Server 2019 — IIS + ASP.NET (.NET Framework 4.x)</div>
+
+<div class="zone" style="right:525px;top:140px;width:590px;height:530px;border-color:#0891b2"></div>
+<div class="zt" style="right:545px;top:129px;color:#0e7490;font-size:13px">Zone اینترنت: <span class="ltr">https://innovation.shastan.ir</span> — Anonymous + FBA</div>
+
+<div class="b sp" style="right:545px;top:170px;width:270px;height:130px"><b>سایت عمومی (Site Collection ریشه)</b><small>مستر پیج <span class="ltr">shastan.master</span> + ماژول‌های JavaScript<br>صفحات: خانه، شرکت‌ها، مسائل، کاتالوگ، تماس<br>ناشناس: فقط خواندن لیست‌های عمومی</small></div>
+<div class="b sp" style="right:545px;top:320px;width:270px;height:130px"><b>زیرسایت <span class="ltr">/panel</span> (بخش مدیریتی/کاربری)</b><small>پنل شرکت تابعه — <span class="ltr">company.aspx</span><br>کارتابل و مدیریت هلدینگ — <span class="ltr">admin.aspx</span><br>ارث‌بری قطع، دسترسی ناشناس خاموش</small></div>
+
+<div class="b cust" style="right:835px;top:170px;width:265px;height:150px"><b>بسته‌ی سفارشی <span class="ltr">_layouts/15/Shastan</span></b><small><span class="ltr">login.aspx</span> — صفحه‌ی ورود اختصاصی FBA<br><span class="ltr">Captcha.ashx</span> — کپچای سمت سرور (امضای MachineKey)<br><span class="ltr">PublicSubmit.ashx</span> — دریافت فرم‌های عمومی<br>(اعتبارسنجی، محدودیت نرخ، کنترل فایل)</small></div>
+<div class="b api" style="right:835px;top:340px;width:265px;height:110px"><b>SharePoint REST API / JSOM</b><small><span class="ltr">/_api/web/lists</span> — OData/JSON<br>X-RequestDigest، Content Approval، Versioning</small></div>
+
+<div class="b data" style="right:545px;top:475px;width:555px;height:105px"><b>لیست‌ها و کتابخانه‌ها (مجوز پوشه‌ای اختصاصی برای هر شرکت)</b><small>
+عمومی: <span class="ltr">Companies · TechChallenges · RDProjects · Products · Patents · Events · Publications …</span><br>
+غیرعمومی: <span class="ltr">CompanyContacts · Proposals · ContactMessages · AuditLog · Contracts</span></small></div>
+<div class="b data" style="right:545px;top:592px;width:555px;height:60px"><small>گروه‌های شیرپوینت ← Role Claim گروه‌های AD: <span class="ltr">SHN-Holding-Admins · SHN-Holding-Reviewers · SHN-Company-&lt;code&gt;-Editors</span></small></div>
+
+<div class="b def" style="right:525px;top:690px;width:590px;height:85px"><b>Zone پیش‌فرض: <span class="ltr">https://innovation.shastan.local</span> — Windows (NTLM/Kerberos)</b><small>فقط برای Crawl جستجو و مدیریت فنی داخلی — از اینترنت در دسترس نیست</small></div>
+<div class="b def" style="right:525px;top:795px;width:285px;height:150px"><b>Central Administration</b><small>پیکربندی فارم، Web Application، Providerها<br>فقط از شبکه‌ی داخلی<br>(مجزا از وب‌اپلیکیشن کاربری)</small></div>
+<div class="b def" style="right:830px;top:795px;width:285px;height:150px"><b>SharePoint Search Service</b><small>ایندکس فقط نسخه‌ی منتشرشده<br>نتایج Security Trimmed</small></div>
+
+<!-- external entities -->
+<div class="b ext" style="right:1215px;top:160px;width:245px;height:115px"><b>Microsoft SQL Server</b><small>پایگاه‌های داده‌ی محتوا، پیکربندی<br>و سرویس‌های شیرپوینت</small></div>
+<div class="b ext" style="right:1215px;top:340px;width:245px;height:115px"><b>Active Directory (Domain Controller)</b><small>کاربران و گروه‌های <span class="ltr">OU=Shastan Portal</span><br>حساب سرویس فقط‌خواندنی <span class="ltr">svc-sp-ldap</span></small></div>
+<div class="b ext" style="right:1215px;top:520px;width:245px;height:115px"><b>سرور ایمیل (SMTP)</b><small>اعلان‌های گردش‌کار و<br>پیشنهاد/پیام جدید به هلدینگ</small></div>
+<div class="b ext" style="right:1215px;top:700px;width:245px;height:115px"><b>ایستگاه کاری مدیر IT</b><small>PowerShell استقرار و پیکربندی<br>(<span class="ltr">Install-ShastanPortal.ps1</span> …)</small></div>
+
+<!-- legend -->
+<div class="lg" style="right:20px;top:640px;width:445px;border:1px solid #cbd5e1;border-radius:10px;padding:10px 14px">
+<b>راهنما</b><br>
+<span class="sw" style="background:#eff6ff;border:1.5px solid #3b82f6"></span>کاربران (Client — مرورگر)<br>
+<span class="sw" style="background:#f0fdf4;border:1.5px solid #16a34a"></span>صفحات و ماژول‌های وب محصول<br>
+<span class="sw" style="background:#fef2f2;border:1.5px solid #c22c2c"></span>کد سمت سرور سفارشی (C# / ASP.NET)<br>
+<span class="sw" style="background:#faf5ff;border:1.5px solid #7c3aed"></span>موجودیت‌های خارجی (محصول نقش کلاینت دارد)<br>
+<span style="display:inline-block;width:34px;border-top:2.5px solid #0f172a;vertical-align:middle;margin-left:6px"></span>ارتباط رمزنگاری‌شده (TLS)&nbsp;&nbsp;
+<span style="display:inline-block;width:34px;border-top:2.5px dashed #64748b;vertical-align:middle;margin-left:6px"></span>ارتباط داخلی<br>
+<span style="display:inline-block;width:34px;border-top:2px dashed #16a34a;vertical-align:middle;margin-left:6px"></span>مرز امنیتی / ناحیه‌ی شبکه
+</div>
+
+<svg width="1500" height="1000" viewBox="0 0 1500 1000">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f172a"/></marker>
+<marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker>
+</defs>
+<!-- users -> WAF (x: users left edge = 1500-235=1265 ; WAF right edge = 1500-290=1210) -->
+<g stroke="#0f172a" stroke-width="2.2" fill="none" marker-end="url(#a)" marker-start="url(#a)">
+<path d="M1265,175 C1240,175 1235,320 1212,320"/>
+<path d="M1265,340 L1212,340"/>
+<path d="M1265,505 C1240,505 1235,360 1212,360"/>
+</g>
+
+<!-- WAF -> SP internet zone (WAF left = 1500-450=1050 ; sp public right = 1500-545=955) -->
+<g stroke="#0f172a" stroke-width="2.2" fill="none" marker-end="url(#a)" marker-start="url(#a)">
+<path d="M1050,330 C1010,330 1000,235 957,235"/>
+<path d="M1050,360 C1010,360 1000,385 957,385"/>
+</g>
+<text class="lbl" x="1003" y="440" text-anchor="middle">HTTPS</text>
+<!-- public site -> custom handlers / API -->
+<g stroke="#64748b" stroke-width="1.8" fill="none" stroke-dasharray="6 4" marker-end="url(#g)">
+<path d="M685,240 L667,240"/>
+<path d="M685,395 L667,395"/>
+</g>
+<!-- farm -> external (farm left = 1500-1130=370 ; ext right = 1500-1215=285) -->
+<g stroke="#0f172a" stroke-width="2.2" fill="none" marker-end="url(#a)">
+<path d="M370,397 L288,397"/>
+</g>
+<g stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#g)"><path d="M370,217 L288,217"/></g>
+<g stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#g)">
+<path d="M370,577 L288,577"/>
+</g>
+<g stroke="#64748b" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#g)">
+<path d="M288,757 L370,757"/>
+</g>
+<text class="lbl" x="329" y="208" text-anchor="middle">TDS 1433</text>
+
+<text class="lbl" x="329" y="388" text-anchor="middle">LDAPS 636</text>
+<text class="lbl" x="329" y="568" text-anchor="middle">SMTP 25/587</text>
+<text class="lbl" x="329" y="748" text-anchor="middle">RDP / PS</text>
+</svg>
+</div></body></html>

@@ -14,6 +14,7 @@
 | [`docs/02-authentication-fba-ldap.md`](docs/02-authentication-fba-ldap.md) | ورود با صفحه‌ی اختصاصی: FBA + LDAP روی Active Directory |
 | [`docs/03-phase1-frontend.md`](docs/03-phase1-frontend.md) | فاز ۱: صفحات، ساختار کد، اجرا و تست |
 | [`docs/04-sharepoint-deployment.md`](docs/04-sharepoint-deployment.md) | **راهنمای گام‌به‌گام استقرار روی شیرپوینت**: لیست‌ها، کتابخانه‌ها، اسکریپت‌ها، تست |
+| [`docs/05-security-assessment-form.md`](docs/05-security-assessment-form.md) | پاسخ فرم درخواست ارزیابی امنیتی (افتا) + [شمای معماری هدف ارزیابی](docs/img/architecture-toe.png) |
 
 ## اجرای سریع
 
